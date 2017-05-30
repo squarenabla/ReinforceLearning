@@ -123,10 +123,8 @@ int main(int argc, char **argv)
 
         chatter_pub.publish(msg);
 
-    //    ros::spinOnce();
         tracker->getPosition();
         usleep(100000);
-        //loop_rate.sleep();
         ++count;
     }
 
