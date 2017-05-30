@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   rotors_gazebo_plugins
   sensor_msgs
+  trajectory_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -110,7 +111,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ReinforceLearning
-  CATKIN_DEPENDS gazebo_msgs gazebo_plugins geometry_msgs mav_msgs roscpp rospy rotors_gazebo_plugins sensor_msgs
+  CATKIN_DEPENDS gazebo_msgs gazebo_plugins geometry_msgs mav_msgs roscpp rospy rotors_gazebo_plugins sensor_msgs trajectory_msgs
 #  DEPENDS system_lib
 )
 
@@ -138,7 +139,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/ReinforceLearning_node.cpp)
+add_executable(EnvironmentTracker_node src/EnvironmentTracker_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,10 +149,10 @@ add_executable(${PROJECT_NAME}_node src/ReinforceLearning_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(EnvironmentTracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(${PROJECT_NAME}_node
+ target_link_libraries(EnvironmentTracker_node
    ${catkin_LIBRARIES}
  )
 
