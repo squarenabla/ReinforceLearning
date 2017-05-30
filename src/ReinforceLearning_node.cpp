@@ -4,98 +4,98 @@
 #include "mav_msgs/AttitudeThrust.h"
 #include "mav_msgs/eigen_mav_msgs.h"
 #include "geometry_msgs/Pose.h"
+#include "std_srvs/Empty.h"
 
 
 #include <sstream>
 
+class environmentTracker {
 
-void chatterCallback(const geometry_msgs::Pose::ConstPtr& msg)
-{
-    ROS_INFO("Position: [%f, %f, %f]", msg->position.x,
-           msg->position.y,
-           msg->position.z);
-    ROS_INFO("Orientation: [%f, %f, %f, %f]", msg->orientation.x,
-           msg->orientation.y,
-           msg->orientation.z,
-           msg->orientation.w);
-}
+private: ros::NodeHandle n;
+    ros::Publisher firefly_motor_control_pub;
+    ros::ServiceClient firefly_reset_client;
+    ros::Subscriber firefly_position_sub;
+public:
+    float current_position[3];
+    float current_orientation[4];
+
+    environmentTracker(ros::NodeHandle node) {
+        n = node;
+        firefly_motor_control_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
+
+        firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
+
+        firefly_position_sub = n.subscribe("/firefly/ground_truth/pose", 1, &environmentTracker::poseCallback, this);
+
+        ros::Rate loop_rate(100);
+    }
+
+    void respawn() {
+        mav_msgs::Actuators msg;
+        msg.angular_velocities = {0, 0, 0, 0, 0, 0};
+        std_srvs::Empty srv;
+
+        firefly_reset_client.call(srv);
+        firefly_motor_control_pub.publish(msg);
+    }
+
+    void poseCallback(const geometry_msgs::Pose::ConstPtr& msg) {
+        current_position[0] = msg->position.x;
+        current_position[1] = msg->position.y;
+        current_position[2] = msg->position.z;
+        current_orientation[0] = msg->orientation.x;
+        current_orientation[1] = msg->orientation.y;
+        current_orientation[2] = msg->orientation.z;
+        current_orientation[3] = msg->orientation.w;
+
+        ROS_INFO("Position: [%f, %f, %f]", msg->position.x,
+                 msg->position.y,
+                 msg->position.z);
+        ROS_INFO("Orientation: [%f, %f, %f, %f]", msg->orientation.x,
+                 msg->orientation.y,
+                 msg->orientation.z,
+                 msg->orientation.w);
+    }
+
+};
+
 
 
 int main(int argc, char **argv)
 {
-  /**
-   * The ros::init() function needs to see argc and argv so that it can perform
-   * any ROS arguments and name remapping that were provided at the command line.
-   * For programmatic remappings you can use a different version of init() which takes
-   * remappings directly, but for most command-line programs, passing argc and argv is
-   * the easiest way to do it.  The third argument to init() is the name of the node.
-   *
-   * You must call one of the versions of ros::init() before using any other
-   * part of the ROS system.
-   */
-  ros::init(argc, argv, "talker");
-
-  /**
-   * NodeHandle is the main access point to communications with the ROS system.
-   * The first NodeHandle constructed will fully initialize this node, and the last
-   * NodeHandle destructed will close down the node.
-   */
-  ros::NodeHandle n;
-
-  /**
-   * The advertise() function is how you tell ROS that you want to
-   * publish on a given topic name. This invokes a call to the ROS
-   * master node, which keeps a registry of who is publishing and who
-   * is subscribing. After this advertise() call is made, the master
-   * node will notify anyone who is trying to subscribe to this topic name,
-   * and they will in turn negotiate a peer-to-peer connection with this
-   * node.  advertise() returns a Publisher object which allows you to
-   * publish messages on that topic through a call to publish().  Once
-   * all copies of the returned Publisher object are destroyed, the topic
-   * will be automatically unadvertised.
-   *
-   * The second parameter to advertise() is the size of the message queue
-   * used for publishing messages.  If messages are published more quickly
-   * than we can send them, the number here specifies how many messages to
-   * buffer up before throwing some away.
-   */
-  ros::Publisher chatter_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
-
-  ros::Subscriber sub = n.subscribe("/firefly/ground_truth/pose", 1, chatterCallback);
-
-  ros::Rate loop_rate(10);
-
-  /**
-   * A count of how many messages we have sent. This is used to create
-   * a unique string for each message.
-   */
-  int count = 0;
-  while (ros::ok())
-  {
-    /**
-     * This is a message object. You stuff it with data, and then publish it.
-     */
-    mav_msgs::Actuators msg;
-    float velocity = atof(argv[1]);
-
-    msg.angular_velocities = {velocity, -velocity, velocity, -velocity, velocity, -velocity};
-
-    //ROS_INFO("%s", msg.angular_velocities);
-
-    /**
-     * The publish() function is how you send messages. The parameter
-     * is the message object. The type of this object must agree with the type
-     * given as a template parameter to the advertise<>() call, as was done
-     * in the constructor above.
-     */
-    chatter_pub.publish(msg);
-
-    ros::spinOnce();
-
-    loop_rate.sleep();
-    ++count;
-  }
 
 
-  return 0;
+    ros::init(argc, argv, "talker");
+
+    ros::NodeHandle n;
+
+    ros::Publisher chatter_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
+    ros::Rate loop_rate(100);
+
+    environmentTracker* tracker = new environmentTracker(n);
+
+
+    int count = 0;
+    while (ros::ok())
+    {
+        if (tracker->current_position[2] <= 0.01 && count > 100) {
+            count = 0;
+            tracker->respawn();
+        }
+
+        mav_msgs::Actuators msg;
+        float velocity = atof(argv[1]);
+
+        msg.angular_velocities = {velocity, velocity, velocity, velocity, velocity, velocity};
+
+        chatter_pub.publish(msg);
+
+        ros::spinOnce();
+
+        loop_rate.sleep();
+        ++count;
+    }
+
+
+    return 0;
 }
