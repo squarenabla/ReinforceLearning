@@ -1,11 +1,12 @@
-import rospy
+#!/usr/bin/env python
+
 import sys
+import rospy
 import math
+from rotors_reinforce.srv import PerformAction
 
 import tensorflow as tf
 import random
-
-from ./rotors_reinforce/srv import *
 
 class environmentState:
     def __init__(self):
@@ -21,9 +22,9 @@ class Policy:
     def getAction(self):
         #random policy
         if (random.random() < 0.8):
-            return {1,1,1,1,1,1}
+            return [1,1,1,1,1,1]
         else:
-            return {0,0,0,0,0,0}
+            return [0,0,0,0,0,0]
 
     def updatePolicy(self, newstate):
         self.state = newstate
@@ -49,12 +50,13 @@ def reinforce_node():
         action = policy.getAction()
 
         #execute action
+        print(action)
         rospy.wait_for_service('env_tr_perform_action')
         try:
             response = serviceClient(action)
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e
-
+        print(response)
         #update environment
         state.currentPosition = response.position
         state.currentOrientation = response.orientation
@@ -64,6 +66,7 @@ def reinforce_node():
 
 if __name__ == '__main__':
     try:
+        print("starting...")
         reinforce_node()
     except rospy.ROSInterruptException:
         pass

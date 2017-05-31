@@ -82,6 +82,7 @@ public:
 
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
     	ROS_ASSERT(req.action.size() == ROTORS_NUM);
+        printf("received request...");
 
         step_counter++;
 
@@ -105,18 +106,25 @@ public:
         mav_msgs::Actuators msg;
         msg.angular_velocities = current_rotor_speed;
 
-        //unpausePhysics();
-    	firefly_motor_control_pub.publish(msg);
-    	usleep(100000);
-    	getPosition();
-        //pausePhysics();
+        printf("publishing msg...");
 
-    	res.position = current_position;
-    	res.orientation = current_orientation;
-    	res.reward = getReward(10, 10, 10, step_counter);
+        unpausePhysics();
+    	firefly_motor_control_pub.publish(msg);
+        usleep(50000);
+    	getPosition();
+        pausePhysics();
+
+        printf("done.");
+
+        printf("creating response...");
+        res.position = current_position;
+        res.orientation = current_orientation;
+        res.reward = getReward(10, 10, 10, step_counter);
+        printf("done.");
     }
 
     void getPosition() {
+            printf("get position...");
             gazebo_msgs::GetModelState srv;
             srv.request.model_name = "firefly";
             if (get_position_client.call(srv)) {
@@ -132,6 +140,7 @@ public:
             else {
                 ROS_ERROR("Failed to get position");
             }
+            printf("done.");
     }
 
     double getReward(const double targetx, const double targety, const double targetz, const int count) {
