@@ -24,11 +24,17 @@ class environmentTracker {
 
 private: ros::NodeHandle n;
     ros::Publisher firefly_motor_control_pub;
+    
     ros::ServiceClient firefly_reset_client;
     ros::ServiceClient get_position_client;
+    ros::ServiceClient pause_physics;
+    ros::ServiceClient unpause_physics;
+
     ros::Subscriber firefly_position_sub;
     ros::ServiceServer perform_action_srv;
     //ros::Publisher chatter_pub; 
+
+    int step_counter;
 
 public:
     std::vector<double> current_position;
@@ -37,11 +43,14 @@ public:
     environmentTracker(ros::NodeHandle node) {
     	current_position.resize(3);
     	current_orientation.resize(4);
+    	step_counter = 0;
 
         n = node;
         firefly_motor_control_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
 
         firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
+        pause_physics = n.serviceClient<std_srvs::Empty>("/gazebo/pause_physics");
+        unpause_physics = n.serviceClient<std_srvs::Empty>("/gazebo/unpause_physics");
         get_position_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
      //   firefly_position_sub = n.subscribe("/firefly/ground_truth/pose", 1, &environmentTracker::poseCallback, this);
         perform_action_srv = n.advertiseService("env_tr_perform_action", &environmentTracker::performAction, this);
@@ -58,16 +67,27 @@ public:
         firefly_motor_control_pub.publish(msg);
     }
 
+    void pausePhysics() {
+    	std_srvs::Empty srv;
+    	pause_physics.call(srv);
+    }
+
+    void unpausePhysics() {
+    	std_srvs::Empty srv;
+    	unpause_physics.call(srv);
+    }
+
     bool performAction(reinforce_learning::PerformAction::Request  &req, reinforce_learning::PerformAction::Response &res) {
         //std::vector<int> actions(req.action);
     	ROS_ASSERT(req.action.size() == ROTORS_NUM);
 
-    	//TODO: implement counter
-    	int count = 30;
+    
 
-		if (current_position[2] <= 0.1 && count > 100) {
+		step_counter++;    	
+
+		if (current_position[2] <= 0.1 && step_counter > 100) {
 			ROS_INFO("Crash, respawn...");
-			count = 0;
+			step_counter = 0;
 			respawn();
 		}
 
@@ -77,16 +97,15 @@ public:
         mav_msgs::Actuators msg;
     	msg.angular_velocities = {(float)req.action[0], (float)req.action[1], (float)req.action[2], (float)req.action[3], (float)req.action[4], (float)req.action[5]};
 
+    	unpausePhysics();
     	firefly_motor_control_pub.publish(msg);
-
     	usleep(100000);
-
-
     	getPosition();
+    	pausePhysics();
 
     	res.position = current_position;
     	res.orientation = current_orientation;
-    	res.reward = getReward(10, 10, 10, count);
+    	res.reward = getReward(10, 10, 10, step_counter);
 
         return true;
     }
