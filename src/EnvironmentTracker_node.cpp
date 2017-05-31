@@ -42,8 +42,8 @@ public:
     std::vector<double> current_rotor_speed;
 
     environmentTracker(ros::NodeHandle node) {
-    	current_position.resize(3);
-    	current_orientation.resize(4);
+        current_position = {0,0,0};
+        current_orientation = {0,0,0,0};
     	step_counter = 0;
 
         n = node;
@@ -65,6 +65,9 @@ public:
         msg.angular_velocities = {0, 0, 0, 0, 0, 0};
         std_srvs::Empty srv;
         current_rotor_speed = {500,500,500,500,500,500};
+        current_position = {0,0,0};
+        current_orientation = {0,0,0,0};
+        step_counter = 0;
 
         firefly_reset_client.call(srv);
         firefly_motor_control_pub.publish(msg);
@@ -88,7 +91,6 @@ public:
 
         if (current_position[2] <= 0.1 && step_counter > 100) {
                 ROS_INFO("Crash, respawn...");
-                step_counter = 0;
                 respawn();
         }
 
@@ -129,6 +131,7 @@ public:
             srv.request.model_name = "firefly";
             if (get_position_client.call(srv)) {
                 ROS_INFO("Position: %f %f %f", (float)srv.response.pose.position.x, (float)srv.response.pose.position.y, (float)srv.response.pose.position.z);
+                printf("change curr pos, ori");
                 current_position[0] = (float)srv.response.pose.position.x;
                 current_position[1] = (float)srv.response.pose.position.y;
                 current_position[2] = (float)srv.response.pose.position.z;
