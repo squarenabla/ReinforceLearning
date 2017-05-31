@@ -3,7 +3,7 @@
 
 
 #include <iostream>
-
+#include <vector>
 
 #include "ros/ros.h"
 #include "mav_msgs/default_topics.h"
@@ -14,7 +14,7 @@
 #include "std_srvs/Empty.h"
 #include "gazebo_msgs/GetModelState.h"
 
-#include "ReinforceLearning/PerformAction.h"
+#include "reinforce_learning/PerformAction.h"
 
 #include <sstream>
 
@@ -38,7 +38,7 @@ public:
         firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
         get_position_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
      //   firefly_position_sub = n.subscribe("/firefly/ground_truth/pose", 1, &environmentTracker::poseCallback, this);
-        perform_action_srv = n.advertiseService("env_tr_perform_action", this->performAction)
+        perform_action_srv = n.advertiseService("env_tr_perform_action", &environmentTracker::performAction, this);
 
         ros::Rate loop_rate(100);
     }
@@ -52,8 +52,12 @@ public:
         firefly_motor_control_pub.publish(msg);
     }
 
-    void performAction(ReinforceLearning::PerformAction::Request  &req, ReinforceLearning::PerformAction::Response &res) {
-        std::cout << sizeof(req.action) / sizeof(int) << "\n";
+    bool performAction(reinforce_learning::PerformAction::Request  &req, reinforce_learning::PerformAction::Response &res) {
+        //std::vector<int> actions(req.action);
+
+        std::cout << req.action.size() << "\n";
+
+        return true;
     }
 
     void poseCallback(const geometry_msgs::Pose::ConstPtr& msg) {
@@ -118,26 +122,27 @@ int main(int argc, char **argv)
 
     environmentTracker* tracker = new environmentTracker(n);
 
+    ros::spin();
 
-    int count = 0;
-    while (1)
-    {
-        if (tracker->current_position[2] <= 0.1 && count > 100) {
-            count = 0;
-            tracker->respawn();
-        }
+    // int count = 0;
+    // while (1)
+    // {
+    //     if (tracker->current_position[2] <= 0.1 && count > 100) {
+    //         count = 0;
+    //         tracker->respawn();
+    //     }
 
-        mav_msgs::Actuators msg;
-        float velocity = atof(argv[1]);
+    //     mav_msgs::Actuators msg;
+    //     float velocity = atof(argv[1]);
 
-        msg.angular_velocities = {velocity, velocity, velocity, velocity, velocity, velocity};
+    //     msg.angular_velocities = {velocity, velocity, velocity, velocity, velocity, velocity};
 
-        chatter_pub.publish(msg);
+    //     chatter_pub.publish(msg);
 
-        tracker->getPosition();
-        usleep(100000);
-        ++count;
-    }
+    //     tracker->getPosition();
+    //     usleep(100000);
+    //     ++count;
+    // }
 
     delete tracker;
     return 0;

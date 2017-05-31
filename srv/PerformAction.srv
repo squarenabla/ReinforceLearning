@@ -1,5 +1,5 @@
-int64 [] action
+int64[] action
 ---
-float64 [] position
-float64 [] orientation
+float64[] position
+float64[] orientation
 float64 reward
