@@ -183,26 +183,6 @@ int main(int argc, char **argv)
 
     ros::spin();
 
-    // int count = 0;
-    // while (1)
-    // {
-    //     if (tracker->current_position[2] <= 0.1 && count > 100) {
-    //         count = 0;
-    //         tracker->respawn();
-    //     }
-
-    //     mav_msgs::Actuators msg;
-    //     float velocity = atof(argv[1]);
-
-    //     msg.angular_velocities = {velocity, velocity, velocity, velocity, velocity, velocity};
-
-    //     chatter_pub.publish(msg);
-
-    //     tracker->getPosition();
-    //     usleep(100000);
-    //     ++count;
-    // }
-
     delete tracker;
     return 0;
 }
