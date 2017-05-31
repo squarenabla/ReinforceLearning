@@ -2,11 +2,12 @@
 
 import sys
 import rospy
-import math
 from rotors_reinforce.srv import PerformAction
 
 import tensorflow as tf
 import random
+import numpy as np
+import math
 
 class environmentState:
     def __init__(self):
@@ -17,18 +18,23 @@ class environmentState:
 class Policy:
     def __init__(self, state):
         self.state = state
-        #initialize policy
+        #set up policy
+        # Initialize table with all zeros
+        self.Q = np.zeros([state_space, np.power(6, 6)])
+        # Set learning parameters
+        self.learningrate = .8
+        self.discountrate = .95
 
     def getAction(self):
-        #random policy
-        if (random.random() < 0.8):
-            return [1,1,1,1,1,1]
-        else:
-            return [0,0,0,0,0,0]
+        i = 1 #TODO: replace with count
+        a = np.argmax(self.Q[self.state.currentPosition, :] + np.random.randn(1, state_space) * (1 / (i + 1)))
 
-    def updatePolicy(self, newstate):
-        self.state = newstate
+
+    def updatePolicy(self, newstate, action):
         #update the policy according to new state
+        # Update Q-Table with new knowledge
+        self.Q[self.state.currentPosition, action] = self.Q[self.state.currentPosition, action] + self.learningrate * (newstate.currentReward + self.discountrate * np.max(self.Q[newstate.currentPosition, :]) - self.Q[self.state.currentPosition, action])
+        self.state = newstate
 
 
 
@@ -40,11 +46,14 @@ def reinforce_node():
 
     state = environmentState()
 
-    #set up policy
+    #initialize policy
     policy = Policy(state)
 
+    # create lists to contain total rewards and steps per episode
+    #rewardList = []
+
     # main loop:
-    while not rospy.is_shutdown():
+    while not rospy.is_shutdown(): #TODO: track episodes
 
         #choose action according to policy
         action = policy.getAction()
@@ -57,12 +66,16 @@ def reinforce_node():
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e
         print(response)
+
         #update environment
         state.currentPosition = response.position
         state.currentOrientation = response.orientation
         state.currentReward = response.reward
+
         #update policy
-        policy.updatePolicy(state)
+        policy.updatePolicy(state, action)
+
+        #rewardList.append(total_reward)
 
 if __name__ == '__main__':
     try:

@@ -96,7 +96,7 @@ public:
 
 
 
-        for(int i = 0; i < sizeof(req.action); i++) {
+        for(int i = 0; i < req.action.size(); i++) {
             if (req.action[i] > 0) {
                 current_rotor_speed[i] = current_rotor_speed[i] +10;
             }
