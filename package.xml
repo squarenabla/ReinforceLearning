@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>ReinforceLearning</name>
+  <name>reinforce_learning</name>
   <version>0.0.0</version>
   <description>The ReinforceLearning package</description>
 
@@ -40,6 +40,7 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
   <build_depend>gazebo_msgs</build_depend>
   <build_depend>gazebo_plugins</build_depend>
   <build_depend>geometry_msgs</build_depend>
@@ -49,7 +50,7 @@
   <build_depend>rotors_gazebo_plugins</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>trajectory_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
+  
   <run_depend>message_runtime</run_depend>
   <run_depend>gazebo_msgs</run_depend>
   <run_depend>gazebo_plugins</run_depend>
