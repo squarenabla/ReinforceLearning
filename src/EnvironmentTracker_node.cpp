@@ -2,6 +2,9 @@
 #include <math.h>
 
 
+#include <iostream>
+
+
 #include "ros/ros.h"
 #include "mav_msgs/default_topics.h"
 #include "mav_msgs/Actuators.h"
@@ -10,6 +13,8 @@
 #include "geometry_msgs/Pose.h"
 #include "std_srvs/Empty.h"
 #include "gazebo_msgs/GetModelState.h"
+
+#include "ReinforceLearning/PerformAction.h"
 
 #include <sstream>
 
@@ -20,6 +25,7 @@ private: ros::NodeHandle n;
     ros::ServiceClient firefly_reset_client;
     ros::ServiceClient get_position_client;
     ros::Subscriber firefly_position_sub;
+    ros::ServiceServer perform_action_srv;
 
 public:
     double current_position[3];
@@ -32,6 +38,7 @@ public:
         firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
         get_position_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
      //   firefly_position_sub = n.subscribe("/firefly/ground_truth/pose", 1, &environmentTracker::poseCallback, this);
+        perform_action_srv = n.advertiseService("env_tr_perform_action", this->performAction)
 
         ros::Rate loop_rate(100);
     }
@@ -43,6 +50,10 @@ public:
 
         firefly_reset_client.call(srv);
         firefly_motor_control_pub.publish(msg);
+    }
+
+    void performAction(ReinforceLearning::PerformAction::Request  &req, ReinforceLearning::PerformAction::Response &res) {
+        std::cout << sizeof(req.action) / sizeof(int) << "\n";
     }
 
     void poseCallback(const geometry_msgs::Pose::ConstPtr& msg) {
