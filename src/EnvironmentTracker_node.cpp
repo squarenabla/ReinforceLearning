@@ -14,7 +14,7 @@
 #include "std_srvs/Empty.h"
 #include "gazebo_msgs/GetModelState.h"
 
-#include "reinforce_learning/PerformAction.h"
+#include "rotors_reinforce/PerformAction.h"
 
 #include <sstream>
 
@@ -30,6 +30,7 @@ private: ros::NodeHandle n;
 public:
     double current_position[3];
     double current_orientation[4];
+    double current_rotor_speed[6];
 
     environmentTracker(ros::NodeHandle node) {
         n = node;
@@ -40,6 +41,7 @@ public:
      //   firefly_position_sub = n.subscribe("/firefly/ground_truth/pose", 1, &environmentTracker::poseCallback, this);
         perform_action_srv = n.advertiseService("env_tr_perform_action", &environmentTracker::performAction, this);
 
+        current_rotor_speed = {0,0,0,0,0,0};
         ros::Rate loop_rate(100);
     }
 
@@ -47,47 +49,66 @@ public:
         mav_msgs::Actuators msg;
         msg.angular_velocities = {0, 0, 0, 0, 0, 0};
         std_srvs::Empty srv;
+        current_rotor_speed = {0,0,0,0,0,0};
 
         firefly_reset_client.call(srv);
         firefly_motor_control_pub.publish(msg);
     }
 
-    bool performAction(reinforce_learning::PerformAction::Request  &req, reinforce_learning::PerformAction::Response &res) {
-        //std::vector<int> actions(req.action);
+    bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
 
-        std::cout << req.action.size() << "\n";
+        for(int i = 0; i < sizeof(req.action); i++) {
+            if (req.action[i] > 0) {
+                current_rotor_speed = current_rotor_speed +10;
+            }
+            else {
+                current_rotor_speed = current_rotor_speed -10;
+            }
+        }
 
+        mav_msgs::Actuators msg;
+        msg.angular_velocities = current_motor_speed;
+        firefly_motor_control_pub.publish(msg);
+
+        usleep(50);
         return true;
     }
 
-    void poseCallback(const geometry_msgs::Pose::ConstPtr& msg) {
-        current_position[0] = msg->position.x;
-        current_position[1] = msg->position.y;
-        current_position[2] = msg->position.z;
-        current_orientation[0] = msg->orientation.x;
-        current_orientation[1] = msg->orientation.y;
-        current_orientation[2] = msg->orientation.z;
-        current_orientation[3] = msg->orientation.w;
+//    void poseCallback(const geometry_msgs::Pose::ConstPtr& msg) {
+//        current_position[0] = msg->position.x;
+//        current_position[1] = msg->position.y;
+//        current_position[2] = msg->position.z;
+//        current_orientation[0] = msg->orientation.x;
+//        current_orientation[1] = msg->orientation.y;
+//        current_orientation[2] = msg->orientation.z;
+//        current_orientation[3] = msg->orientation.w;
 
-        ROS_INFO("Position: [%f, %f, %f]", msg->position.x,
-                 msg->position.y,
-                 msg->position.z);
-        ROS_INFO("Orientation: [%f, %f, %f, %f]", msg->orientation.x,
-                 msg->orientation.y,
-                 msg->orientation.z,
-                 msg->orientation.w);
-    }
+//        ROS_INFO("Position: [%f, %f, %f]", msg->position.x,
+//                 msg->position.y,
+//                 msg->position.z);
+//        ROS_INFO("Orientation: [%f, %f, %f, %f]", msg->orientation.x,
+//                 msg->orientation.y,
+//                 msg->orientation.z,
+//                 msg->orientation.w);
+//    }
 
     void getPosition() {
-        gazebo_msgs::GetModelState srv;
-        srv.request.model_name = "firefly";
-        if (get_position_client.call(srv)) {
-            ROS_INFO("Possition: %f %f %f", (float)srv.response.pose.position.x, (float)srv.response.pose.position.y, (float)srv.response.pose.position.z);
+            gazebo_msgs::GetModelState srv;
+            srv.request.model_name = "firefly";
+            if (get_position_client.call(srv)) {
+                ROS_INFO("Position: %f %f %f", (float)srv.response.pose.position.x, (float)srv.response.pose.position.y, (float)srv.response.pose.position.z);
+                current_position[0] = (float)srv.response.pose.position.x;
+                current_position[1] = (float)srv.response.pose.position.y;
+                current_position[2] = (float)srv.response.pose.position.z;
+                current_orientation[0] = (float)srv.response.pose.orientation.x;
+                current_orientation[1] = (float)srv.response.pose.orientation.y;
+                current_orientation[2] = (float)srv.response.pose.orientation.z;
+                current_orientation[3] = (float)srv.response.pose.orientation.w;
+            }
+            else {
+                ROS_ERROR("Failed to get position");
+            }
         }
-        else {
-            ROS_ERROR("Failed to get position");
-        }
-    }
 
     double getReward(const double targetx, const double targety, const double targetz, const int count) {
 
@@ -117,32 +138,22 @@ int main(int argc, char **argv)
 
     ros::NodeHandle n;
 
-    ros::Publisher chatter_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
     ros::Rate loop_rate(100);
 
     environmentTracker* tracker = new environmentTracker(n);
 
     ros::spin();
 
-    // int count = 0;
-    // while (1)
-    // {
-    //     if (tracker->current_position[2] <= 0.1 && count > 100) {
-    //         count = 0;
-    //         tracker->respawn();
-    //     }
+     int count = 0;
+     while (ros::ok)
+     {
+         if (tracker->current_position[2] <= 0.1 && count > 100) {
+             count = 0;
+             tracker->respawn();
+         }
 
-    //     mav_msgs::Actuators msg;
-    //     float velocity = atof(argv[1]);
-
-    //     msg.angular_velocities = {velocity, velocity, velocity, velocity, velocity, velocity};
-
-    //     chatter_pub.publish(msg);
-
-    //     tracker->getPosition();
-    //     usleep(100000);
-    //     ++count;
-    // }
+         ++count;
+     }
 
     delete tracker;
     return 0;

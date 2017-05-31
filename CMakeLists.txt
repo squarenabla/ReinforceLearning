@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(reinforce_learning)
+project(rotors_reinforce)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   rotors_gazebo_plugins
   sensor_msgs
-  trajectory_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -110,8 +110,8 @@ generate_messages(DEPENDENCIES std_msgs)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ReinforceLearning
-  CATKIN_DEPENDS gazebo_msgs gazebo_plugins geometry_msgs mav_msgs roscpp rospy rotors_gazebo_plugins sensor_msgs trajectory_msgs
+#  LIBRARIES rotors_reinforce
+  CATKIN_DEPENDS gazebo_msgs gazebo_plugins geometry_msgs mav_msgs roscpp rospy rotors_gazebo_plugins sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -128,7 +128,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/ReinforceLearning.cpp
+#   src/${PROJECT_NAME}/rotors_reinforce.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -196,7 +196,7 @@ add_dependencies(EnvironmentTracker_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${c
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_ReinforceLearning.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rotors_reinforce.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
