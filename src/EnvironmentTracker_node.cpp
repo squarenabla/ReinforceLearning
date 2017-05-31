@@ -18,6 +18,8 @@
 
 #include <sstream>
 
+#define ROTORS_NUM 6
+
 class environmentTracker {
 
 private: ros::NodeHandle n;
@@ -26,12 +28,16 @@ private: ros::NodeHandle n;
     ros::ServiceClient get_position_client;
     ros::Subscriber firefly_position_sub;
     ros::ServiceServer perform_action_srv;
+    //ros::Publisher chatter_pub; 
 
 public:
-    double current_position[3];
-    double current_orientation[4];
+    std::vector<double> current_position;
+    std::vector<double> current_orientation;
 
     environmentTracker(ros::NodeHandle node) {
+    	current_position.resize(3);
+    	current_orientation.resize(4);
+
         n = node;
         firefly_motor_control_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
 
@@ -54,8 +60,33 @@ public:
 
     bool performAction(reinforce_learning::PerformAction::Request  &req, reinforce_learning::PerformAction::Response &res) {
         //std::vector<int> actions(req.action);
+    	ROS_ASSERT(req.action.size() == ROTORS_NUM);
 
-        std::cout << req.action.size() << "\n";
+    	//TODO: implement counter
+    	int count = 30;
+
+		if (current_position[2] <= 0.1 && count > 100) {
+			ROS_INFO("Crash, respawn...");
+			count = 0;
+			respawn();
+		}
+
+		//TODO: map recieved actions to the real values
+		//then send real values
+
+        mav_msgs::Actuators msg;
+    	msg.angular_velocities = {(float)req.action[0], (float)req.action[1], (float)req.action[2], (float)req.action[3], (float)req.action[4], (float)req.action[5]};
+
+    	firefly_motor_control_pub.publish(msg);
+
+    	usleep(100000);
+
+
+    	getPosition();
+
+    	res.position = current_position;
+    	res.orientation = current_orientation;
+    	res.reward = getReward(10, 10, 10, count);
 
         return true;
     }
@@ -86,7 +117,16 @@ public:
         }
         else {
             ROS_ERROR("Failed to get position");
+            return;
         }
+
+        current_position[0] = (double)srv.response.pose.position.x;
+        current_position[1] = (double)srv.response.pose.position.y;
+        current_position[2] = (double)srv.response.pose.position.z;
+        current_orientation[0] = (double)srv.response.pose.orientation.x;
+        current_orientation[1] = (double)srv.response.pose.orientation.y;
+        current_orientation[2] = (double)srv.response.pose.orientation.z;
+        current_orientation[3] = (double)srv.response.pose.orientation.w;
     }
 
     double getReward(const double targetx, const double targety, const double targetz, const int count) {
@@ -117,7 +157,7 @@ int main(int argc, char **argv)
 
     ros::NodeHandle n;
 
-    ros::Publisher chatter_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
+    
     ros::Rate loop_rate(100);
 
     environmentTracker* tracker = new environmentTracker(n);
