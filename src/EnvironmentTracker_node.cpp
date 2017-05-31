@@ -44,6 +44,7 @@ public:
     environmentTracker(ros::NodeHandle node) {
     	current_position.resize(3);
     	current_orientation.resize(4);
+        current_rotor_speed.resize(6, 500);
     	step_counter = 0;
 
         n = node;
@@ -55,16 +56,13 @@ public:
 
         get_position_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
         perform_action_srv = n.advertiseService("env_tr_perform_action", &environmentTracker::performAction, this);
-
-        current_rotor_speed = {500,500,500,500,500,500};
-        ros::Rate loop_rate(100);
     }
 
     void respawn() {
         mav_msgs::Actuators msg;
         msg.angular_velocities = {0, 0, 0, 0, 0, 0};
         std_srvs::Empty srv;
-        current_rotor_speed = {500,500,500,500,500,500};
+        current_rotor_speed.resize(6, 500);
 
         firefly_reset_client.call(srv);
         firefly_motor_control_pub.publish(msg);
@@ -82,7 +80,6 @@ public:
 
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
     	ROS_ASSERT(req.action.size() == ROTORS_NUM);
-        printf("received request...");
 
         step_counter++;
 
@@ -94,7 +91,7 @@ public:
 
 
 
-        for(int i = 0; i < sizeof(req.action); i++) {
+        for(int i = 0; i < req.action.size(); i++) {
             if (req.action[i] > 0) {
                 current_rotor_speed[i] = current_rotor_speed[i] +10;
             }
@@ -106,25 +103,18 @@ public:
         mav_msgs::Actuators msg;
         msg.angular_velocities = current_rotor_speed;
 
-        printf("publishing msg...");
-
         unpausePhysics();
     	firefly_motor_control_pub.publish(msg);
         usleep(50000);
     	getPosition();
         pausePhysics();
 
-        printf("done.");
-
-        printf("creating response...");
         res.position = current_position;
         res.orientation = current_orientation;
         res.reward = getReward(10, 10, 10, step_counter);
-        printf("done.");
     }
 
     void getPosition() {
-            printf("get position...");
             gazebo_msgs::GetModelState srv;
             srv.request.model_name = "firefly";
             if (get_position_client.call(srv)) {
@@ -140,7 +130,6 @@ public:
             else {
                 ROS_ERROR("Failed to get position");
             }
-            printf("done.");
     }
 
     double getReward(const double targetx, const double targety, const double targetz, const int count) {
