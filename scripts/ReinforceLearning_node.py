@@ -5,7 +5,7 @@ import math
 import tensorflow as tf
 import random
 
-from rotors_reinforce.srv import *
+from ./rotors_reinforce/srv import *
 
 class environmentState:
     def __init__(self):
@@ -27,7 +27,6 @@ class Policy:
 
     def updatePolicy(self, newstate):
         self.state = newstate
-
         #update the policy according to new state
 
 
@@ -36,7 +35,7 @@ def reinforce_node():
 
     #set up env
     rospy.init_node('ReinforceLearning', anonymous=True)
-    serviceClient = rospy.ServiceProxy('PerformAction', PerformAction)
+    serviceClient = rospy.ServiceProxy('env_tr_perform_action', PerformAction)
 
     state = environmentState()
 
@@ -50,7 +49,7 @@ def reinforce_node():
         action = policy.getAction()
 
         #execute action
-        rospy.wait_for_service('ourService')
+        rospy.wait_for_service('env_tr_perform_action')
         try:
             response = serviceClient(action)
         except rospy.ServiceException, e:
