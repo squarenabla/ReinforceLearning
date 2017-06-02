@@ -15,6 +15,7 @@
 #include "gazebo_msgs/GetModelState.h"
 
 #include "rotors_reinforce/PerformAction.h"
+#include "rotors_reinforce/GetState.h"
 
 #include <sstream>
 
@@ -33,6 +34,7 @@ private:
 
     ros::Subscriber firefly_position_sub;
     ros::ServiceServer perform_action_srv;
+    ros::ServiceServer get_state_srv;
 
     int step_counter;
 
@@ -41,8 +43,12 @@ public:
     std::vector<double> current_orientation;
     std::vector<double> current_rotor_speed;
 
+    std::vector<double> target_position;
+
     environmentTracker(ros::NodeHandle node) {
     	current_position.resize(3);
+        //hard constants for target
+        target_position = {0.0, 0.0, 10.0};
     	current_orientation.resize(4);
         current_rotor_speed.resize(6, 500);
     	step_counter = 0;
@@ -56,6 +62,7 @@ public:
 
         get_position_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
         perform_action_srv = n.advertiseService("env_tr_perform_action", &environmentTracker::performAction, this);
+        get_state_srv = n.advertiseService("env_tr_get_state", &environmentTracker::getState, this);
     }
 
     void respawn() {
@@ -83,24 +90,19 @@ public:
     	unpause_physics.call(srv);
     }
 
-    bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
-    	ROS_ASSERT(req.action.size() == ROTORS_NUM);
+    bool performAction(rotors_reinforce::PerformAction::Request &req, rotors_reinforce::PerformAction::Response &res) {
+    	//ROS_ASSERT(req.action.size() == ROTORS_NUM);
 
         step_counter++;
 
-        if (current_position[2] <= 0.1 && step_counter > 100) {
-                ROS_INFO("Crash, respawn...");
-                respawn();
-        }
-
-
+        res.crashed = false;
 
         for(int i = 0; i < req.action.size(); i++) {
             if (req.action[i] > 0) {
-                current_rotor_speed[i] = current_rotor_speed[i] +10;
+                current_rotor_speed[i] += 10;
             }
             else {
-                current_rotor_speed[i] = current_rotor_speed[i] -10;
+                current_rotor_speed[i] -= 10;
             }
         }
 
@@ -113,9 +115,28 @@ public:
     	getPosition();
         pausePhysics();
 
+        res.target_position = target_position;
         res.position = current_position;
         res.orientation = current_orientation;
-        res.reward = getReward(10, 10, 10, step_counter);
+        res.reward = getReward(step_counter);
+
+        //crash check at the end        
+        if(current_position[2] <= 0.1 && step_counter > 100) {
+                ROS_INFO("Crash, respawn...");
+                step_counter = 0;
+                res.crashed = true;
+                respawn();
+        }
+
+        return true;
+    }
+
+    bool getState(rotors_reinforce::GetState::Request &req, rotors_reinforce::GetState::Response &res) {
+        getPosition();
+        res.target_position = target_position;
+        res.position = current_position;
+        res.orientation = current_orientation;
+        return true;
     }
 
     void getPosition() {
@@ -124,23 +145,23 @@ public:
             if (get_position_client.call(srv)) {
                 ROS_INFO("Position: %f %f %f", (float)srv.response.pose.position.x, (float)srv.response.pose.position.y, (float)srv.response.pose.position.z);
 
-                current_position[0] = (float)srv.response.pose.position.x;
-                current_position[1] = (float)srv.response.pose.position.y;
-                current_position[2] = (float)srv.response.pose.position.z;
-                current_orientation[0] = (float)srv.response.pose.orientation.x;
-                current_orientation[1] = (float)srv.response.pose.orientation.y;
-                current_orientation[2] = (float)srv.response.pose.orientation.z;
-                current_orientation[3] = (float)srv.response.pose.orientation.w;
+                current_position[0] = (double)srv.response.pose.position.x;
+                current_position[1] = (double)srv.response.pose.position.y;
+                current_position[2] = (double)srv.response.pose.position.z;
+                current_orientation[0] = (double)srv.response.pose.orientation.x;
+                current_orientation[1] = (double)srv.response.pose.orientation.y;
+                current_orientation[2] = (double)srv.response.pose.orientation.z;
+                current_orientation[3] = (double)srv.response.pose.orientation.w;
             }
             else {
                 ROS_ERROR("Failed to get position");
             }
     }
 
-    double getReward(const double targetx, const double targety, const double targetz, const int count) {
-        double difx = current_position[0] - targetx;
-        double dify = current_position[1] - targety;
-        double difz = current_position[2] - targetz;
+    double getReward(const int count) {
+        double difx = current_position[0] - target_position[0];
+        double dify = current_position[1] - target_position[1];
+        double difz = current_position[2] - target_position[3];
 
         if (current_position[2] <= 0.1 && count > 100) {
             return 0.0;
