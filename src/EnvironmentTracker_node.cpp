@@ -95,10 +95,10 @@ public:
         }
 
         for(int i = 0; i < req.action.size(); i++) {
-            if (req.action[i] > 0 && current_control_params > 0) { //increase stay decrease...
+            if (current_control_params == 1) { //1 =increase, 0 = stay, -1 = decrease
                 current_control_params[i] = current_control_params[i] +1;
             }
-            else {
+            if (current_control_params == -1) {
                 current_control_params[i] = current_control_params[i] -1;
             }
         }
