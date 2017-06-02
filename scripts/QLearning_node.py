@@ -11,29 +11,50 @@ import math
 
 class environmentState:
     def __init__(self):
-        self.currentPosition = {0,0,0}
-        self.currentOrientation = {0,0,0,0}
+        self.currentPosition = [0,0,0]
+        self.currentOrientation = [0,0,0,0]
         self.currentReward = 0
+
+    def get(self):
+        result = [0, 0, 0]
+
+        i = 1
+
+        while (i < 11):
+            if (self.currentPosition[0] < i):
+                result[0] = result[0] + 1
+            if (self.currentPosition[1] < i):
+                result[1] = result[1] + 1
+            if (self.currentPosition[2] < i):
+                result[2] = result[2] + 1
+            i = i+1
+
+        return result
+
+
 
 class Policy:
     def __init__(self, state):
         self.state = state
         #set up policy
         # Initialize table with all zeros
-        self.Q = np.zeros([state_space, np.power(6, 6)])
+        self.Q = np.zeros([np.power(3, 10), 4*4])
         # Set learning parameters
         self.learningrate = .8
         self.discountrate = .95
 
     def getAction(self):
         i = 1 #TODO: replace with count
-        a = np.argmax(self.Q[self.state.currentPosition, :] + np.random.randn(1, state_space) * (1 / (i + 1)))
+        print(self.state.get())
+        print(self.Q[self.state.get(), :])
+        a = np.argmax(self.Q[self.state.get(), :] + np.random.randn(3, 4) * (1 / (i + 1)))
+        return a
 
 
     def updatePolicy(self, newstate, action):
         #update the policy according to new state
         # Update Q-Table with new knowledge
-        self.Q[self.state.currentPosition, action] = self.Q[self.state.currentPosition, action] + self.learningrate * (newstate.currentReward + self.discountrate * np.max(self.Q[newstate.currentPosition, :]) - self.Q[self.state.currentPosition, action])
+        self.Q[self.state.get(), action] = self.Q[self.state.get(), action] + self.learningrate * (newstate.currentReward + self.discountrate * np.max(self.Q[newstate.get(), :]) - self.Q[self.state.get(), action])
         self.state = newstate
 
 
@@ -56,15 +77,21 @@ def reinforce_node():
     while not rospy.is_shutdown(): #TODO: track episodes
 
         #choose action according to policy
-        action = policy.getAction()
+        #action = policy.getAction()
+        if (state.currentPosition[2] < 5):
+            action = [0,0,0,1]
+        else:
+            action = [0,0,0,0]
 
         #execute action
+        print("action:")
         print(action)
         rospy.wait_for_service('env_tr_perform_action')
         try:
             response = serviceClient(action)
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e
+        print("response:")
         print(response)
 
         #update environment
@@ -73,7 +100,7 @@ def reinforce_node():
         state.currentReward = response.reward
 
         #update policy
-        policy.updatePolicy(state, action)
+        #policy.updatePolicy(state, action)
 
         #rewardList.append(total_reward)
 
