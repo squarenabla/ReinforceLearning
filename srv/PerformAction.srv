@@ -1,5 +1,7 @@
 int64[] action
 ---
 float64[] position
+float64[] target_position
 float64[] orientation
 float64 reward
+bool crashed
