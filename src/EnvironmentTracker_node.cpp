@@ -91,38 +91,17 @@ public:
     	unpause_physics.call(srv);
     }
 
-<<<<<<< HEAD
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
         ROS_ASSERT(req.action.size() == current_control_params.size());
 
         step_counter++;
 
-        if (current_position[2] <= 0.1 && step_counter > 100) {
-                ROS_INFO("Crash, respawn...");
-                respawn();
-        }
-
         for(int i = 0; i < req.action.size(); i++) {
-            if (current_control_params == 1) { //1 =increase, 0 = stay, -1 = decrease
+            if (req.action[i] == 1) { //1 =increase, 0 = stay, 2 = decrease
                 current_control_params[i] = current_control_params[i] +1;
             }
-            if (current_control_params == -1) {
+            if (req.action[i] == 2) {
                 current_control_params[i] = current_control_params[i] -1;
-=======
-    bool performAction(rotors_reinforce::PerformAction::Request &req, rotors_reinforce::PerformAction::Response &res) {
-    	//ROS_ASSERT(req.action.size() == ROTORS_NUM);
-
-        step_counter++;
-
-        res.crashed = false;
-
-        for(int i = 0; i < req.action.size(); i++) {
-            if (req.action[i] > 0) {
-                current_rotor_speed[i] += 10;
-            }
-            else {
-                current_rotor_speed[i] -= 10;
->>>>>>> 3c3a175266e19f39ec6b23b6b26a643e77b02b3d
             }
         }
 
@@ -159,11 +138,8 @@ public:
         res.target_position = target_position;
         res.position = current_position;
         res.orientation = current_orientation;
-<<<<<<< HEAD
-        res.reward = getReward(0, 0, 5, step_counter);
-=======
+        
         return true;
->>>>>>> 3c3a175266e19f39ec6b23b6b26a643e77b02b3d
     }
 
     void getPosition() {
@@ -195,8 +171,9 @@ public:
         }
 
         double reward4position =  1/(difx * difx + dify * dify + difz * difz + 1);
-        double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
-        return reward4position * reward4orientation;
+        //double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
+        //return reward4position * reward4orientation;
+        return reward4position;
     }
 
 };
@@ -212,6 +189,8 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(100);
 
     environmentTracker* tracker = new environmentTracker(n);
+
+    ROS_INFO("Comunication node ready");
 
     ros::spin();
 

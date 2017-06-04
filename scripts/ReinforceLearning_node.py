@@ -29,7 +29,7 @@ class ComputationalGraph:
             self.b_2 = tf.get_variable("policy_b2", [action_num * action_size])
 
             self.po_state = tf.placeholder(tf.float32, [None, state_size])
-            self.po_prev_actions = tf.placeholder(tf.float32, [None, action_num * action_size])
+            self.po_prev_actions = tf.placeholder(tf.float32, [None, action_num, action_size])
             self.po_return = tf.placeholder(tf.float32, [None, 1])
 
             self.po_output1 = tf.nn.sigmoid(tf.add(tf.matmul(self.po_state, self.po_W1), self.b_1))
@@ -39,8 +39,8 @@ class ComputationalGraph:
             self.po_max_probabilities = tf.reduce_max(self.po_probabilities, axis = -1)
             self.po_computed_actions = tf.argmax(self.po_probabilities, axis = -1)
 
-            self.po_matr_prev_actions = tf.reshape(self.po_prev_actions, [-1, action_num, action_size])
-            self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_matr_prev_actions, self.po_probabilities), -1)) * self.po_return
+            #self.po_matr_prev_actions = tf.reshape(self.po_prev_actions, [-1, action_num, action_size])
+            self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_prev_actions, self.po_probabilities), -1)) * self.po_return
             self.po_loss = -tf.reduce_sum(self.po_eligibility, -1)
             self.po_optimizer = tf.train.AdamOptimizer(self.po_lrate).minimize(self.po_loss)
 
@@ -64,7 +64,7 @@ class ComputationalGraph:
     def calculateAction(self, sess, state):
         state_one_hot_sequence = np.expand_dims(state, axis = 0)
         action = sess.run(self.po_computed_actions, feed_dict={self.po_state : state_one_hot_sequence})
-        probability = sess.run(self.self.po_max_probabilities, feed_dict={self.po_state : state_one_hot_sequence})
+        probability = sess.run(self.po_max_probabilities, feed_dict={self.po_state : state_one_hot_sequence})
         return action, probability
 
     def calculateReward(self, sess, state):
@@ -89,9 +89,17 @@ class ComputationalGraph:
             advantages.append(future_reward - prediction)
             update_vals.append(future_reward)
 
-        assert (len(history.getActions()) == len(history.getStates()) == len(advantages)), "Size of action, state and reward arrays don't match"
 
-        sess.run(self.v_optimizer, feed_dict={self.v_state: history.getStates()})
+        assert (len(history.getActions()) == len(history.getStates()) == len(advantages)), \
+            "Size of action, state and reward arrays don't match (%i %i %i)" %(len(history.getActions()), \
+                                                                                len(history.getStates()), \
+                                                                                len(advantages))
+
+
+        #print history.getStates()
+
+        sess.run(self.v_optimizer, feed_dict={self.v_state: history.getStates(),
+                                              self.v_actual_return: np.expand_dims(update_vals, axis=1)})
         sess.run(self.po_optimizer, feed_dict={self.po_state: history.getStates(),
                                                self.po_prev_actions: history.getActions(),
                                                self.po_return: np.expand_dims(advantages, axis=1)})
@@ -109,8 +117,10 @@ class History:
     def addAction2History(self, action):
         action_matrix = np.zeros((ACTION_NUM, ACTION_SIZE), dtype = np.float32)
         for i, act in enumerate(action):
-            action_matrix[i][act] = 1.0
+            #print action[i], act
+            action_matrix[i][int(act)] = 1.0
         self.actions.append(action_matrix)
+        #self.actions.append(action)
 
     def getActions(self):
         return self.actions
@@ -120,7 +130,7 @@ class History:
         return self.actions[-1]
 
     def addState2History(self, response):
-        state = np.concatenate([response.currentPosition, response.orientation, response.target_position])
+        state = np.concatenate([response.position, response.orientation, response.target_position])
         self.states.append(state)
 
     def getStates(self):
@@ -144,42 +154,10 @@ class History:
         assert (len(self.rewards) > 0), "Reward history is empty!"
         return self.rewards[-1]
 
-##############
-##OLD CLASSES#
-##############
-
-# class environmentState:
-#     def __init__(self):
-#         self.currentPosition = np.array([0.0, 0.0, 0.0])
-#         self.currentOrientation = np.array([0.0, 0.0, 0.0, 0.0])
-#         self.currentReward = 0.0
-#
-# class Policy:
-#     def __init__(self, state):
-#         self.state = state
-#         #set up policy
-#         # Initialize table with all zeros
-#         self.Q = np.zeros([state_space, np.power(6, 6)])
-#         # Set learning parameters
-#         self.learningrate = .8
-#         self.discountrate = .95
-#
-#     def getAction(self):
-#         i = 1 #TODO: replace with count
-#         a = np.argmax(self.Q[self.state.currentPosition, :] + np.random.randn(1, state_space) * (1 / (i + 1)))
-#
-#
-#     def updatePolicy(self, newstate, action):
-#         #update the policy according to new state
-#         # Update Q-Table with new knowledge
-#         self.Q[self.state.currentPosition, action] = self.Q[self.state.currentPosition, action] + self.learningrate * (newstate.currentReward + self.discountrate * np.max(self.Q[newstate.currentPosition, :]) - self.Q[self.state.currentPosition, action])
-#         self.state = newstate
-
-##############
-##OLD CLASSES#
-##############
-
-
+    def clean(self):
+        self.states = []
+        self.actions = []
+        self.rewards = []
 
 def reinforce_node():
 
@@ -202,6 +180,8 @@ def reinforce_node():
         while not rospy.is_shutdown():
             crashed_flag = False
 
+
+            print "new episode"
             #get initial state
             print "Get initial state"
             rospy.wait_for_service('env_tr_get_state')
@@ -209,11 +189,14 @@ def reinforce_node():
                 response = get_state_client()
             except rospy.ServiceException, e:
                 print "Service call failed: %s" % e
+
+            history.clean()
             history.addState2History(response)
 
             # run episode, while not crashed and simulation is running
             while not crashed_flag and not rospy.is_shutdown():
                 #get most probable variant to act for each action, and the probabilities
+
                 [computed_action, probability] = graph.calculateAction(sess, history.getLastState())
 
                 #choose action stochasticaly
@@ -221,7 +204,7 @@ def reinforce_node():
                     if random.uniform(0, 1) > probability[0][i]:
                         executed_action[i] = np.random.randint(ACTION_SIZE)
                     else:
-                        executed_action[i] = computed_action[0][i]
+                        executed_action[i] = int(computed_action[0][i])
 
                 #execute action
                 print(executed_action)
@@ -241,7 +224,7 @@ def reinforce_node():
 
 
             #update policy
-            graph.updatePolicy(history)
+            graph.updatePolicy(sess, history)
 
             #rewardList.append(total_reward)
 
