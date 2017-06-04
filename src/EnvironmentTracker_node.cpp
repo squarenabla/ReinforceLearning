@@ -144,7 +144,7 @@ public:
         res.reward = getReward(step_counter);
 
         //crash check at the end        
-        if(current_position[2] <= 0.1 && step_counter > 100) {
+        if((current_position[2] <= 0.1 || current_position[2] >= 50.0) && step_counter > 100) {
                 ROS_INFO("Crash, respawn...");
                 step_counter = 0;
                 res.crashed = true;
