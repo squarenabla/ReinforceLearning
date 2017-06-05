@@ -2,6 +2,7 @@
 #include <math.h>
 
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -96,14 +97,34 @@ public:
 
         step_counter++;
 
-        for(int i = 0; i < req.action.size(); i++) {
+        for(int i = 0; i < req.action.size()-1; i++) {
             if (req.action[i] == 1) { //1 =increase, 0 = stay, 2 = decrease
-                current_control_params[i] = current_control_params[i] +1;
+                current_control_params[i] = current_control_params[i] + 1.0;
+                current_control_params[i] = std::min(current_control_params[i], 50.0);
             }
             if (req.action[i] == 2) {
-                current_control_params[i] = current_control_params[i] -1;
+                current_control_params[i] = current_control_params[i] - 1.0;
+                current_control_params[i] = std::max(current_control_params[i], -50.0);
             }
+            // switch(req.action[i]) {
+            //     case 0:
+            //         current_control_params[i] = -30.0;
+            //         break;
+            //     case 1:
+            //         current_control_params[i] = -15.0;
+            //         break;
+            //     case 2:
+            //         current_control_params[i] = 0.0;
+            //         break;
+            //     case 3:
+            //         current_control_params[i] = 15.0;
+            //         break;
+            //     case 4: 
+            //         current_control_params[i] = 30.0;
+            //         break;
+            //     }
         }
+       // current_control_params[3] = req.action[3] * 4;
 
         mav_msgs::RollPitchYawrateThrust msg;
         msg.roll = current_control_params[0];
@@ -123,7 +144,10 @@ public:
         res.reward = getReward(step_counter);
 
         //crash check at the end        
-        if((current_position[2] <= 0.1 || current_position[2] >= 50.0) && step_counter > 100) {
+        if((current_position[2] <= 0.1 || current_position[2] >= 50.0 || //z constraints
+            current_position[1] >= 50.0 || current_position[1] <= -50.0 || //y constraints
+            current_position[0] >= 50.0 || current_position[0] <= -50.0) //x constraints
+            && step_counter > 50) {
                 ROS_INFO("Crash, respawn...");
                 step_counter = 0;
                 res.crashed = true;
@@ -164,13 +188,14 @@ public:
     double getReward(const int count) {
         double difx = current_position[0] - target_position[0];
         double dify = current_position[1] - target_position[1];
-        double difz = current_position[2] - target_position[3];
+        double difz = current_position[2] - target_position[2];
 
-        if (current_position[2] <= 0.1 && count > 100) {
+        if (current_position[2] <= 0.1 && count > 50) {
             return 0.0;
         }
 
-        double reward4position =  1/(difx * difx + dify * dify + difz * difz + 1);
+        //ROS_INFO("diffs^2: %f %f %f", difx * difx, dify * dify, difz * difz);
+        double reward4position =  1/(difx * difx + dify * dify + difz * difz + 1.0);
         //double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
         //return reward4position * reward4orientation;
         return reward4position;

@@ -200,7 +200,7 @@ def reinforce_node():
                 [computed_action, probability] = graph.calculateAction(sess, history.getLastState())
 
                 #choose action stochasticaly
-                for i, act in enumerate(computed_action):
+                for i, act in enumerate(computed_action[0]):
                     if random.uniform(0, 1) > probability[0][i]:
                         executed_action[i] = np.random.randint(ACTION_SIZE)
                     else:
