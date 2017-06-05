@@ -9,6 +9,7 @@
 #include "ros/ros.h"
 #include "mav_msgs/default_topics.h"
 #include "mav_msgs/RollPitchYawrateThrust.h"
+#include "mav_msgs/Actuators.h"
 #include "mav_msgs/eigen_mav_msgs.h"
 #include "geometry_msgs/Pose.h"
 #include "std_srvs/Empty.h"
@@ -20,11 +21,14 @@
 #include <sstream>
 
 
+int maxstep = 50;
+
 class environmentTracker {
 
 private:
     ros::NodeHandle n;
     ros::Publisher firefly_control_pub;
+    ros::Publisher firefly_motor_control_pub;
     
     ros::ServiceClient firefly_reset_client;
     ros::ServiceClient get_position_client;
@@ -54,6 +58,7 @@ public:
 
         n = node;
         firefly_control_pub = n.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", 1000);
+        firefly_motor_control_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
         firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
 
         pause_physics = n.serviceClient<std_srvs::Empty>("/gazebo/pause_physics");
@@ -65,21 +70,24 @@ public:
     }
 
     void respawn() {
-        mav_msgs::RollPitchYawrateThrust msg;
-        msg.roll = 0;
-        msg.pitch = 0;
-        msg.yaw_rate = 0;
-        msg.thrust.z = 0;
+        // mav_msgs::RollPitchYawrateThrust msg;
+        // msg.roll = 0;
+        // msg.pitch = 0;
+        // msg.yaw_rate = 0;
+        // msg.thrust.z = 0;
         std_srvs::Empty srv;
 
-        current_position = {0,0,0};
-        current_orientation = {0,0,0,0};
-        step_counter = 0;
+        mav_msgs::Actuators msg;
+        msg.angular_velocities = {545.0, 545.0, 545.0, 545.0, 545.0, 545.0};
+        // current_position = {0,0,0};
+        // current_orientation = {0,0,0,0};
+        // step_counter = 0;
 
-        current_control_params.resize(4, 0);
+//        current_control_params.resize(4, 0);
 
         firefly_reset_client.call(srv);
-        firefly_control_pub.publish(msg);
+        //firefly_control_pub.publish(msg);
+        firefly_motor_control_pub.publish(msg);
     }
 
     void pausePhysics() {
@@ -93,7 +101,8 @@ public:
     }
 
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
-        ROS_ASSERT(req.action.size() == current_control_params.size());
+        //ROS_ASSERT(req.action.size() == current_control_params.size());
+        ROS_ASSERT(req.action.size() == 6);
 
         step_counter++;
 
@@ -126,14 +135,23 @@ public:
         }
        // current_control_params[3] = req.action[3] * 4;
 
-        mav_msgs::RollPitchYawrateThrust msg;
-        msg.roll = current_control_params[0];
-        msg.pitch = current_control_params[1];
-        msg.yaw_rate = current_control_params[2];
-        msg.thrust.z = current_control_params[3];
+        //mav_msgs::RollPitchYawrateThrust msg;
+        //msg.roll = current_control_params[0];
+        // msg.pitch = current_control_params[1];
+        // msg.yaw_rate = current_control_params[2];
+        // msg.thrust.z = current_control_params[3];
+
+        mav_msgs::Actuators msg;
+        msg.angular_velocities = {(float)req.action[0],
+                                  (float)req.action[1], 
+                                  (float)req.action[2], 
+                                  (float)req.action[3], 
+                                  (float)req.action[4],
+                                  (float)req.action[5]};
 
         unpausePhysics();
-        firefly_control_pub.publish(msg);
+        //firefly_control_pub.publish(msg);
+        firefly_motor_control_pub.publish(msg);
         usleep(50000);
     	getPosition();
         pausePhysics();
@@ -147,7 +165,7 @@ public:
         if((current_position[2] <= 0.1 || current_position[2] >= 50.0 || //z constraints
             current_position[1] >= 50.0 || current_position[1] <= -50.0 || //y constraints
             current_position[0] >= 50.0 || current_position[0] <= -50.0) //x constraints
-            && step_counter > 50) {
+            && step_counter > maxstep) {
                 ROS_INFO("Crash, respawn...");
                 step_counter = 0;
                 res.crashed = true;
@@ -190,7 +208,7 @@ public:
         double dify = current_position[1] - target_position[1];
         double difz = current_position[2] - target_position[2];
 
-        if (current_position[2] <= 0.1 && count > 50) {
+        if (current_position[2] <= 0.1 && count > maxstep) {
             return 0.0;
         }
 
@@ -214,6 +232,11 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(100);
 
     environmentTracker* tracker = new environmentTracker(n);
+
+    if(argc == 2) {
+        maxstep = atoi(argv[1]);
+    }
+
 
     ROS_INFO("Comunication node ready");
 

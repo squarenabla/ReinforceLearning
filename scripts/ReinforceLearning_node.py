@@ -12,97 +12,147 @@ import math
 
 
 STATE_SIZE = 3 + 4 + 3
-ACTION_NUM = 4
-ACTION_SIZE = 3
+ACTION_NUM = 6
+ACTION_SIZE = 7
+
+import atexit
+
+def termination_funk():
+    print "terminated\n"
+    _train_writer.close()
+
+atexit.register(termination_funk)
+
+def variable_summaries(var):
+  """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+  with tf.name_scope('summaries'):
+    mean = tf.reduce_mean(var)
+    tf.summary.scalar('mean', mean)
+    with tf.name_scope('stddev'):
+      stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+    tf.summary.scalar('stddev', stddev)
+    tf.summary.scalar('max', tf.reduce_max(var))
+    tf.summary.scalar('min', tf.reduce_min(var))
+    tf.summary.histogram('histogram', var)
 
 class ComputationalGraph:
-    def __init__(self):
-        self.po_lrate = 0.02
-        self.v_lrate = 0.1
+        def __init__(self):
+            self.po_lrate = 0.02
+            self.v_lrate = 0.1
 
-    def constructGraph(self, state_size, action_num, action_size):
-        with tf.variable_scope("policy"):
-            self.po_W1 = tf.get_variable("policy_W1", [state_size, state_size])
-            self.b_1 = tf.get_variable("policy_b1", [state_size])
+        def constructGraph(self, sess, state_size, action_num, action_size):
+            with tf.variable_scope("policy"):
+                self.po_state = tf.placeholder(tf.float32, [None, state_size], name="po_state")
+                self.po_prev_actions = tf.placeholder(tf.float32, [None, action_num, action_size], name="po_prev_action")
+                self.po_return = tf.placeholder(tf.float32, [None, 1], name="po_return")
 
-            self.po_W2 = tf.get_variable("policy_W2", [state_size, action_num * action_size])
-            self.b_2 = tf.get_variable("policy_b2", [action_num * action_size])
+                #formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
+                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 1
 
-            self.po_state = tf.placeholder(tf.float32, [None, state_size])
-            self.po_prev_actions = tf.placeholder(tf.float32, [None, action_num, action_size])
-            self.po_return = tf.placeholder(tf.float32, [None, 1])
+                self.po_W1 = tf.get_variable("policy_W1", [state_size, hid_neurons_num])
+                self.po_b1 = tf.get_variable("policy_b1", [hid_neurons_num])
 
-            self.po_output1 = tf.nn.sigmoid(tf.add(tf.matmul(self.po_state, self.po_W1), self.b_1))
-            self.po_output2 = tf.add(tf.matmul(self.po_output1, self.po_W2), self.b_2)
+                self.po_W2 = tf.get_variable("policy_W2", [hid_neurons_num, action_num * action_size])
+                self.po_b2 = tf.get_variable("policy_b2", [action_num * action_size])
 
-            self.po_probabilities = tf.nn.softmax(tf.reshape(self.po_output2, [-1, action_num, action_size]))
-            self.po_max_probabilities = tf.reduce_max(self.po_probabilities, axis = -1)
-            self.po_computed_actions = tf.argmax(self.po_probabilities, axis = -1)
+                self.po_output1 = tf.nn.sigmoid(tf.add(tf.matmul(self.po_state, self.po_W1), self.po_b1))
+                self.po_output2 = tf.add(tf.matmul(self.po_output1, self.po_W2), self.po_b2)
 
-            #self.po_matr_prev_actions = tf.reshape(self.po_prev_actions, [-1, action_num, action_size])
-            self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_prev_actions, self.po_probabilities), -1)) * self.po_return
-            self.po_loss = -tf.reduce_sum(self.po_eligibility, -1)
-            self.po_optimizer = tf.train.AdamOptimizer(self.po_lrate).minimize(self.po_loss)
+                self.po_probabilities = tf.nn.softmax(tf.reshape(self.po_output2, [-1, action_num, action_size]))
+                self.po_max_probabilities = tf.reduce_max(self.po_probabilities, axis = -1)
+                self.po_computed_actions = tf.argmax(self.po_probabilities, axis = -1)
 
-        with tf.variable_scope("value"):
-            self.v_state = tf.placeholder(tf.float32, [None, state_size])
-            self.v_actual_return = tf.placeholder(tf.float32, [None, 1])
+                #self.po_matr_prev_actions = tf.reshape(self.po_prev_actions, [-1, action_num, action_size])
+                self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_prev_actions, self.po_probabilities), -1)) * self.po_return
+                self.po_loss = -tf.reduce_sum(self.po_eligibility, -1)
+                self.po_optimizer = tf.train.AdamOptimizer(self.po_lrate).minimize(self.po_loss)
 
-
-            self.v_W1 = tf.get_variable("value_V1", [state_size, 10])
-            self.v_b1 = tf.get_variable("value_b1", [10])
-            self.v_W2 = tf.get_variable("value_W2", [10, 1])
-            self.v_b2 = tf.get_variable("value_b2", [1])
-            # in the future, try to calculate return for for each action
-
-            self.v_output1 = tf.nn.sigmoid(tf.matmul(self.v_state, self.v_W1) + self.v_b1)
-            self.v_output2 = tf.matmul(self.v_output1, self.v_W2) + self.v_b2
-            self.v_diffs = self.v_output2 - self.v_actual_return
-            self.v_loss = tf.nn.l2_loss(self.v_diffs)
-            self.v_optimizer = tf.train.AdamOptimizer(self.v_lrate).minimize(self.v_loss)
-
-    def calculateAction(self, sess, state):
-        state_one_hot_sequence = np.expand_dims(state, axis = 0)
-        action = sess.run(self.po_computed_actions, feed_dict={self.po_state : state_one_hot_sequence})
-        probability = sess.run(self.po_max_probabilities, feed_dict={self.po_state : state_one_hot_sequence})
-        return action, probability
-
-    def calculateReward(self, sess, state):
-        state_one_hot_sequence = np.expand_dims(state, axis=0)
-        reward = sess.run(self.v_output2, feed_dict={self.v_state: state_one_hot_sequence})
-        return reward[0][0]
-
-    def updatePolicy(self, sess, history):
-        rewards = history.getRewardHistory()
-        advantages = []
-        update_vals = []
-
-        for i, reward in enumerate(rewards):
-            future_reward = 0
-            future_transitions = len(rewards) - i
-            decrease = 1
-            for index2 in xrange(future_transitions):
-                future_reward += rewards[(index2) + i] * decrease
-                decrease = decrease * 0.97
-
-            prediction = self.calculateReward(sess, history.getState(i))
-            advantages.append(future_reward - prediction)
-            update_vals.append(future_reward)
+            with tf.variable_scope("value"):
+                self.v_state = tf.placeholder(tf.float32, [None, state_size], name="v_state")
+                self.v_actual_return = tf.placeholder(tf.float32, [None, 1], name="v_actual_return")
 
 
-        assert (len(history.getActions()) == len(history.getStates()) == len(advantages)), \
-            "Size of action, state and reward arrays don't match (%i %i %i)" %(len(history.getActions()), \
-                                                                                len(history.getStates()), \
-                                                                                len(advantages))
+                self.v_W1 = tf.get_variable("value_V1", [state_size, 10])
+                self.v_b1 = tf.get_variable("value_b1", [10])
+                self.v_W2 = tf.get_variable("value_W2", [10, 1])
+                self.v_b2 = tf.get_variable("value_b2", [1])
+                # in the future, try to calculate return for for each action
+
+                self.v_output1 = tf.nn.sigmoid(tf.matmul(self.v_state, self.v_W1) + self.v_b1)
+                self.v_output2 = tf.matmul(self.v_output1, self.v_W2) + self.v_b2
+                self.v_diffs = self.v_output2 - self.v_actual_return
+                self.v_loss = tf.nn.l2_loss(self.v_diffs)
+                self.v_optimizer = tf.train.AdamOptimizer(self.v_lrate).minimize(self.v_loss)
+
+            self.constructSummary(sess)
+
+        def constructSummary(self, sess):
+            variable_summaries(self.po_W1)
+            variable_summaries(self.po_W2)
+            variable_summaries(self.po_b1)
+            variable_summaries(self.po_b2)
+            #variable_summaries(self.v_W1)
+            #variable_summaries(self.v_W2)
+            #variable_summaries(self.v_b1)
+            #variable_summaries(self.v_b2)
+
+            tf.summary.histogram('policy_output_1', self.po_output1)
+            tf.summary.histogram('policy_softmax_probabilities', self.po_probabilities)
 
 
-        #print history.getStates()
+            #tf.summary.scalar('policy_loss', self.po_loss)
+            #tf.summary.scalar('value_loss', self.v_loss)
 
-        sess.run(self.v_optimizer, feed_dict={self.v_state: history.getStates(),
-                                              self.v_actual_return: np.expand_dims(update_vals, axis=1)})
-        sess.run(self.po_optimizer, feed_dict={self.po_state: history.getStates(),
-                                               self.po_prev_actions: history.getActions(),
-                                               self.po_return: np.expand_dims(advantages, axis=1)})
+            self.merged = tf.summary.merge_all()
+
+            global _train_writer
+            _train_writer = tf.summary.FileWriter('./log/train', sess.graph)
+
+
+        def calculateAction(self, sess, state):
+            state_one_hot_sequence = np.expand_dims(state, axis = 0)
+            action = sess.run(self.po_computed_actions, feed_dict={self.po_state : state_one_hot_sequence})
+            probability = sess.run(self.po_max_probabilities, feed_dict={self.po_state : state_one_hot_sequence})
+            return action, probability
+
+        def calculateReward(self, sess, state):
+            state_one_hot_sequence = np.expand_dims(state, axis=0)
+            reward = sess.run(self.v_output2, feed_dict={self.v_state: state_one_hot_sequence})
+            return reward[0][0]
+
+        def updatePolicy(self, sess, history):
+            rewards = history.getRewardHistory()
+            advantages = []
+            update_vals = []
+
+            for i, reward in enumerate(rewards):
+                future_reward = 0
+                future_transitions = len(rewards) - i
+                decrease = 1
+                for index2 in xrange(future_transitions):
+                    future_reward += rewards[(index2) + i] * decrease
+                    decrease = decrease * 0.97
+
+                prediction = self.calculateReward(sess, history.getState(i))
+                advantages.append(future_reward - prediction)
+                update_vals.append(future_reward)
+
+
+            assert (len(history.getActions()) == len(history.getStates()) == len(advantages)), \
+                "Size of action, state and reward arrays don't match (%i %i %i)" %(len(history.getActions()), \
+                                                                                    len(history.getStates()), \
+                                                                                    len(advantages))
+
+
+            #print history.getStates()
+
+            sess.run(self.v_optimizer, feed_dict={self.v_state: history.getStates(),
+                                                                            self.v_actual_return: np.expand_dims(update_vals, axis=1)})
+
+            statistics, _ = sess.run([self.merged, self.po_optimizer], feed_dict={self.po_state: history.getStates(),
+                                                                             self.po_prev_actions: history.getActions(),
+                                                                             self.po_return: np.expand_dims(advantages, axis=1)})
+            _train_writer.add_summary(statistics)
 
 
 
@@ -169,12 +219,15 @@ def reinforce_node():
     history = History()
 
     graph = ComputationalGraph()
-    graph.constructGraph(STATE_SIZE, ACTION_NUM, ACTION_SIZE)
-    init_op = tf.global_variables_initializer()
 
+    action = np.zeros(ACTION_NUM)
     executed_action = np.zeros(ACTION_NUM)
 
     with tf.Session() as sess:
+
+        #test_writer = tf.summary.FileWriter('/log/test')
+        graph.constructGraph(sess, STATE_SIZE, ACTION_NUM, ACTION_SIZE)
+        init_op = tf.global_variables_initializer()
         sess.run(init_op)
         # main loop:
         while not rospy.is_shutdown():
@@ -202,9 +255,10 @@ def reinforce_node():
                 #choose action stochasticaly
                 for i, act in enumerate(computed_action[0]):
                     if random.uniform(0, 1) > probability[0][i]:
-                        executed_action[i] = np.random.randint(ACTION_SIZE)
+                        action[i] = np.random.randint(ACTION_SIZE)
                     else:
-                        executed_action[i] = int(computed_action[0][i])
+                        action[i] = int(computed_action[0][i])
+                    executed_action[i] = 515 + action[i] * 10
 
                 #execute action
                 print(executed_action)
@@ -216,7 +270,7 @@ def reinforce_node():
                 print(response)
 
                 #update history
-                history.addAction2History(executed_action)
+                history.addAction2History(action)
                 history.addState2History(response)
                 history.addReward2History(response.reward)
 
