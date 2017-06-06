@@ -14,6 +14,7 @@
 #include "geometry_msgs/Pose.h"
 #include "std_srvs/Empty.h"
 #include "gazebo_msgs/GetModelState.h"
+#include "gazebo_msgs/ContactsState.h"
 
 #include "rotors_reinforce/PerformAction.h"
 #include "rotors_reinforce/GetState.h"
@@ -38,7 +39,6 @@ class environmentTracker {
 private:
     ros::NodeHandle n;
     ros::Publisher firefly_control_pub;
-    ros::Publisher firefly_motor_control_pub;
     
     ros::ServiceClient firefly_reset_client;
     ros::ServiceClient get_position_client;
@@ -46,11 +46,13 @@ private:
     ros::ServiceClient unpause_physics;
 
     ros::Subscriber firefly_position_sub;
+    ros::Subscriber firefly_collision_sub;
     ros::ServiceServer perform_action_srv;
     ros::ServiceServer get_state_srv;
 
     int step_counter;
     double current_yaw_vel_;
+    bool crashed_flag;
 
 public:
     std::vector<double> current_position;
@@ -71,7 +73,7 @@ public:
 
         n = node;
         firefly_control_pub = n.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", 1000);
-        firefly_motor_control_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
+        firefly_collision_sub = n.subscribe("/rotor_collision", 100, &environmentTracker::onCollision, this);
         firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
 
         pause_physics = n.serviceClient<std_srvs::Empty>("/gazebo/pause_physics");
@@ -90,8 +92,6 @@ public:
         msg.thrust.z = 0;
         std_srvs::Empty srv;
 
-//        mav_msgs::Actuators msg;
-//        msg.angular_velocities = {545.0, 545.0, 545.0, 545.0, 545.0, 545.0};
         current_position = {0,0,0};
         current_orientation = {0,0,0,0};
         step_counter = 0;
@@ -100,7 +100,6 @@ public:
 
         firefly_reset_client.call(srv);
         firefly_control_pub.publish(msg);
-        //firefly_motor_control_pub.publish(msg);
     }
 
     void pausePhysics() {
@@ -113,9 +112,20 @@ public:
     	unpause_physics.call(srv);
     }
 
+    void onCollision(const gazebo_msgs::ContactsState::ConstPtr& msg) {
+        if (msg->states.size() > 1 || current_position[2] >= 50.0 || //z constraints
+            current_position[1] >= 50.0 || current_position[1] <= -50.0 || //y constraints
+            current_position[0] >= 50.0 || current_position[0] <= -50.0 //x constraints
+            && step_counter > maxstep) {
+                ROS_INFO("Crash, respawn...");
+                step_counter = 0;
+                crashed_flag = true;
+                respawn();
+        }
+    }
+
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
         ROS_ASSERT(req.action.size() == current_control_params.size());
-        //ROS_ASSERT(req.action.size() == 6);
 
         step_counter++;
 
@@ -168,17 +178,8 @@ public:
     
         ROS_INFO("roll: %f, pitch: %f, yaw_rate: %f, thrust %f", msg.roll, msg.pitch, msg.yaw_rate, msg.thrust.z);
 
-        //mav_msgs::Actuators msg;
-        // msg.angular_velocities = {(float)req.action[0],
-        //                           (float)req.action[1], 
-        //                           (float)req.action[2], 
-        //                           (float)req.action[3], 
-        //                           (float)req.action[4],
-        //                           (float)req.action[5]};
-
         unpausePhysics();
         firefly_control_pub.publish(msg);
-        //firefly_motor_control_pub.publish(msg);
         usleep(50000);
     	getPosition();
         pausePhysics();
@@ -189,14 +190,9 @@ public:
         res.reward = getReward(step_counter);
 
         //crash check at the end        
-        if((current_position[2] <= 0.1 || current_position[2] >= 50.0 || //z constraints
-            current_position[1] >= 50.0 || current_position[1] <= -50.0 || //y constraints
-            current_position[0] >= 50.0 || current_position[0] <= -50.0) //x constraints
-            && step_counter > maxstep) {
-                ROS_INFO("Crash, respawn...");
-                step_counter = 0;
-                res.crashed = true;
-                respawn();
+        if(crashed_flag) {
+            res.crashed = true;
+            crashed_flag = false;
         }
 
         return true;
