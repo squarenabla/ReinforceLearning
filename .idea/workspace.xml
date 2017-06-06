@@ -6,10 +6,6 @@
       <change type="DELETED" beforePath="$USER_HOME$/Study2/lab/exercise2/cartpole/openaigym.manifest.0.12169.manifest.json" afterPath="" />
       <change type="DELETED" beforePath="$USER_HOME$/Study2/lab/exercise2/test.tar.gz" afterPath="" />
       <change type="MODIFICATION" beforePath="$USER_HOME$/Study2/lab/exercise2/Q-learning.py" afterPath="$USER_HOME$/Study2/lab/exercise2/Q-learning.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/ReinforceLearning_node.py" afterPath="$PROJECT_DIR$/scripts/ReinforceLearning_node.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/EnvironmentTracker_node.cpp" afterPath="$PROJECT_DIR$/src/EnvironmentTracker_node.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/srv/PerformAction.srv" afterPath="$PROJECT_DIR$/srv/PerformAction.srv" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -343,7 +339,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
+    <frame x="65" y="-4" width="1301" height="772" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17601845" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
