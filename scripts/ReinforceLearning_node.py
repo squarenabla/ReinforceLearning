@@ -12,7 +12,7 @@ import math
 
 
 STATE_SIZE = 3 + 4 + 3
-ACTION_NUM = 6
+ACTION_NUM = 4
 ACTION_SIZE = 7
 
 import atexit
@@ -44,7 +44,7 @@ class ComputationalGraph:
             with tf.variable_scope("policy"):
                 self.po_state = tf.placeholder(tf.float32, [None, state_size], name="po_state")
                 self.po_prev_actions = tf.placeholder(tf.float32, [None, action_num, action_size], name="po_prev_action")
-                self.po_return = tf.placeholder(tf.float32, [None, 1], name="po_return")
+                self.po_return = tf.placeholder(tf.float32, [None], name="po_return")
 
                 #formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
                 hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 1
@@ -52,19 +52,23 @@ class ComputationalGraph:
                 self.po_W1 = tf.get_variable("policy_W1", [state_size, hid_neurons_num])
                 self.po_b1 = tf.get_variable("policy_b1", [hid_neurons_num])
 
-                self.po_W2 = tf.get_variable("policy_W2", [hid_neurons_num, action_num * action_size])
-                self.po_b2 = tf.get_variable("policy_b2", [action_num * action_size])
+                self.po_W2 = tf.get_variable("policy_W2", [hid_neurons_num, hid_neurons_num])
+                self.po_b2 = tf.get_variable("policy_b2", [hid_neurons_num])
+
+                self.po_W3 = tf.get_variable("policy_W3", [hid_neurons_num, action_num * action_size])
+                self.po_b3 = tf.get_variable("policy_b3", [action_num * action_size])
 
                 self.po_output1 = tf.nn.sigmoid(tf.add(tf.matmul(self.po_state, self.po_W1), self.po_b1))
-                self.po_output2 = tf.add(tf.matmul(self.po_output1, self.po_W2), self.po_b2)
+                self.po_output2 = tf.nn.sigmoid(tf.add(tf.matmul(self.po_output1, self.po_W2), self.po_b2))
+                self.po_output3 = tf.nn.sigmoid(tf.add(tf.matmul(self.po_output2, self.po_W3), self.po_b3))
 
-                self.po_probabilities = tf.nn.softmax(tf.reshape(self.po_output2, [-1, action_num, action_size]))
+                self.po_probabilities = tf.nn.softmax(tf.reshape(self.po_output3, [-1, action_num, action_size]))
                 self.po_max_probabilities = tf.reduce_max(self.po_probabilities, axis = -1)
                 self.po_computed_actions = tf.argmax(self.po_probabilities, axis = -1)
 
                 #self.po_matr_prev_actions = tf.reshape(self.po_prev_actions, [-1, action_num, action_size])
-                self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_prev_actions, self.po_probabilities), -1)) * self.po_return
-                self.po_loss = -tf.reduce_sum(self.po_eligibility, -1)
+                self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_prev_actions, self.po_probabilities), -1))
+                self.po_loss = tf.multiply(-tf.reduce_sum(self.po_eligibility, -1), self.po_return)
                 self.po_optimizer = tf.train.AdamOptimizer(self.po_lrate).minimize(self.po_loss)
 
             with tf.variable_scope("value"):
@@ -151,7 +155,7 @@ class ComputationalGraph:
 
             statistics, _ = sess.run([self.merged, self.po_optimizer], feed_dict={self.po_state: history.getStates(),
                                                                              self.po_prev_actions: history.getActions(),
-                                                                             self.po_return: np.expand_dims(advantages, axis=1)})
+                                                                             self.po_return: advantages})
             _train_writer.add_summary(statistics)
 
 
@@ -258,9 +262,14 @@ def reinforce_node():
                         action[i] = np.random.randint(ACTION_SIZE)
                     else:
                         action[i] = int(computed_action[0][i])
-                    executed_action[i] = 515 + action[i] * 10
+
+                executed_action[0] = (float(action[0]) - 3.0) * 2.0 / float(ACTION_SIZE - 1)
+                executed_action[1] = (float(action[1]) - 3.0) * 2.0 / float(ACTION_SIZE - 1)
+                executed_action[2] = (float(action[2]) - 3.0)
+                executed_action[3] = float(action[3]) / float(ACTION_SIZE - 1)
 
                 #execute action
+                #print(action)
                 print(executed_action)
                 rospy.wait_for_service('env_tr_perform_action')
                 try:

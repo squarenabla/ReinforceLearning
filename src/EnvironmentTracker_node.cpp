@@ -23,6 +23,16 @@
 
 int maxstep = 50;
 
+const double max_v_xy = 1.0;  // [m/s]
+const double max_roll = 10.0 * M_PI / 180.0;  // [rad]
+const double max_pitch = 10.0 * M_PI / 180.0;  // [rad]
+const double max_rate_yaw = 45.0 * M_PI / 180.0;  // [rad/s]
+const double max_thrust = 30.0;  // [N]
+
+const double axes_roll_direction = -1.0;
+const double axes_pitch_direction = 1.0;
+const double axes_thrust_direction = 1.0;
+
 class environmentTracker {
 
 private:
@@ -40,6 +50,7 @@ private:
     ros::ServiceServer get_state_srv;
 
     int step_counter;
+    double current_yaw_vel_;
 
 public:
     std::vector<double> current_position;
@@ -56,6 +67,8 @@ public:
         current_control_params.resize(4, 0);
     	step_counter = 0;
 
+        current_yaw_vel_ = 0.0;
+
         n = node;
         firefly_control_pub = n.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", 1000);
         firefly_motor_control_pub = n.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", 1000);
@@ -70,24 +83,24 @@ public:
     }
 
     void respawn() {
-        // mav_msgs::RollPitchYawrateThrust msg;
-        // msg.roll = 0;
-        // msg.pitch = 0;
-        // msg.yaw_rate = 0;
-        // msg.thrust.z = 0;
+        mav_msgs::RollPitchYawrateThrust msg;
+        msg.roll = 0;
+        msg.pitch = 0;
+        msg.yaw_rate = 0;
+        msg.thrust.z = 0;
         std_srvs::Empty srv;
 
-        mav_msgs::Actuators msg;
-        msg.angular_velocities = {545.0, 545.0, 545.0, 545.0, 545.0, 545.0};
-        // current_position = {0,0,0};
-        // current_orientation = {0,0,0,0};
-        // step_counter = 0;
+//        mav_msgs::Actuators msg;
+//        msg.angular_velocities = {545.0, 545.0, 545.0, 545.0, 545.0, 545.0};
+        current_position = {0,0,0};
+        current_orientation = {0,0,0,0};
+        step_counter = 0;
 
-//        current_control_params.resize(4, 0);
+        current_control_params.resize(4, 0);
 
         firefly_reset_client.call(srv);
-        //firefly_control_pub.publish(msg);
-        firefly_motor_control_pub.publish(msg);
+        firefly_control_pub.publish(msg);
+        //firefly_motor_control_pub.publish(msg);
     }
 
     void pausePhysics() {
@@ -101,21 +114,21 @@ public:
     }
 
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
-        //ROS_ASSERT(req.action.size() == current_control_params.size());
-        ROS_ASSERT(req.action.size() == 6);
+        ROS_ASSERT(req.action.size() == current_control_params.size());
+        //ROS_ASSERT(req.action.size() == 6);
 
         step_counter++;
 
-        for(int i = 0; i < req.action.size()-1; i++) {
-            if (req.action[i] == 1) { //1 =increase, 0 = stay, 2 = decrease
-                current_control_params[i] = current_control_params[i] + 1.0;
-                current_control_params[i] = std::min(current_control_params[i], 50.0);
-            }
-            if (req.action[i] == 2) {
-                current_control_params[i] = current_control_params[i] - 1.0;
-                current_control_params[i] = std::max(current_control_params[i], -50.0);
-            }
-            // switch(req.action[i]) {
+        // for(int i = 0; i < req.action.size()-1; i++) {
+        //     if (req.action[i] == 1) { //1 =increase, 0 = stay, 2 = decrease
+        //         current_control_params[i] = current_control_params[i] + 1.0;
+        //         current_control_params[i] = std::min(current_control_params[i], 50.0);
+        //     }
+        //     if (req.action[i] == 2) {
+        //         current_control_params[i] = current_control_params[i] - 1.0;
+        //         current_control_params[i] = std::max(current_control_params[i], -50.0);
+        //     }
+        //     // switch(req.action[i]) {
             //     case 0:
             //         current_control_params[i] = -30.0;
             //         break;
@@ -132,26 +145,40 @@ public:
             //         current_control_params[i] = 30.0;
             //         break;
             //     }
-        }
+        //}
        // current_control_params[3] = req.action[3] * 4;
 
-        //mav_msgs::RollPitchYawrateThrust msg;
-        //msg.roll = current_control_params[0];
-        // msg.pitch = current_control_params[1];
-        // msg.yaw_rate = current_control_params[2];
-        // msg.thrust.z = current_control_params[3];
+        mav_msgs::RollPitchYawrateThrust msg;
+        msg.roll = req.action[0] * max_roll * axes_roll_direction;
+        msg.pitch = req.action[1] * max_pitch * axes_pitch_direction;
 
-        mav_msgs::Actuators msg;
-        msg.angular_velocities = {(float)req.action[0],
-                                  (float)req.action[1], 
-                                  (float)req.action[2], 
-                                  (float)req.action[3], 
-                                  (float)req.action[4],
-                                  (float)req.action[5]};
+        if(req.action[2] > 0.01) {
+            current_yaw_vel_ = max_rate_yaw;
+        }
+        else if (req.action[2] < -0.01) {
+            current_yaw_vel_ = max_rate_yaw;   
+        }
+        else {
+            current_yaw_vel_ = 0.0;   
+        }
+
+        msg.yaw_rate = current_yaw_vel_;
+        msg.thrust.z = req.action[3] * max_thrust * axes_thrust_direction;
+
+    
+        ROS_INFO("roll: %f, pitch: %f, yaw_rate: %f, thrust %f", msg.roll, msg.pitch, msg.yaw_rate, msg.thrust.z);
+
+        //mav_msgs::Actuators msg;
+        // msg.angular_velocities = {(float)req.action[0],
+        //                           (float)req.action[1], 
+        //                           (float)req.action[2], 
+        //                           (float)req.action[3], 
+        //                           (float)req.action[4],
+        //                           (float)req.action[5]};
 
         unpausePhysics();
-        //firefly_control_pub.publish(msg);
-        firefly_motor_control_pub.publish(msg);
+        firefly_control_pub.publish(msg);
+        //firefly_motor_control_pub.publish(msg);
         usleep(50000);
     	getPosition();
         pausePhysics();

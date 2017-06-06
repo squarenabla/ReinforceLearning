@@ -1,4 +1,4 @@
-int64[] action
+float64[] action
 ---
 float64[] position
 float64[] target_position
