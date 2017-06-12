@@ -21,9 +21,6 @@
 
 #include <sstream>
 
-
-int maxstep = 50;
-
 const double max_v_xy = 1.0;  // [m/s]
 const double max_roll = 10.0 * M_PI / 180.0;  // [rad]
 const double max_pitch = 10.0 * M_PI / 180.0;  // [rad]
@@ -47,6 +44,7 @@ private:
 
     ros::Subscriber firefly_position_sub;
     ros::Subscriber firefly_collision_sub;
+    ros::Subscriber firefly_ground_collision_sub;
     ros::ServiceServer perform_action_srv;
     ros::ServiceServer get_state_srv;
 
@@ -64,7 +62,7 @@ public:
     environmentTracker(ros::NodeHandle node) {
     	current_position.resize(3);
         //hard constants for target
-        target_position = {0.0, 0.0, 10.0};
+        target_position = {0.0, 0.0, 5.0};
     	current_orientation.resize(4);
         current_control_params.resize(4, 0);
     	step_counter = 0;
@@ -74,6 +72,7 @@ public:
         n = node;
         firefly_control_pub = n.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", 1000);
         firefly_collision_sub = n.subscribe("/rotor_collision", 100, &environmentTracker::onCollision, this);
+        firefly_ground_collision_sub = n.subscribe("/base_collision", 100, &environmentTracker::onCollisionGround, this);
         firefly_reset_client = n.serviceClient<std_srvs::Empty>("/gazebo/reset_world");
 
         pause_physics = n.serviceClient<std_srvs::Empty>("/gazebo/pause_physics");
@@ -112,11 +111,19 @@ public:
     	unpause_physics.call(srv);
     }
 
+    void onCollisionGround(const gazebo_msgs::ContactsState::ConstPtr& msg) {
+        if (msg->states.size() > 1 && step_counter > 50) {
+            ROS_INFO("Crash, respawn...");
+            step_counter = 0;
+            crashed_flag = true;
+            respawn();
+        }
+    }
+
     void onCollision(const gazebo_msgs::ContactsState::ConstPtr& msg) {
-        if (msg->states.size() > 1 || current_position[2] >= 50.0 || //z constraints
-            current_position[1] >= 50.0 || current_position[1] <= -50.0 || //y constraints
-            current_position[0] >= 50.0 || current_position[0] <= -50.0 //x constraints
-            && step_counter > maxstep) {
+        if (msg->states.size() > 1 || current_position[2] >= 10.0 || //z constraints
+            current_position[1] >= 10.0 || current_position[1] <= -10.0 || //y constraints
+            current_position[0] >= 10.0 || current_position[0] <= -10.0) { //x constraints
                 ROS_INFO("Crash, respawn...");
                 step_counter = 0;
                 crashed_flag = true;
@@ -231,14 +238,14 @@ public:
         double dify = current_position[1] - target_position[1];
         double difz = current_position[2] - target_position[2];
 
-        if (current_position[2] <= 0.1 && count > maxstep) {
+        if (crashed_flag) {
             return 0.0;
         }
 
         //ROS_INFO("diffs^2: %f %f %f", difx * difx, dify * dify, difz * difz);
-        double reward4position =  1/(difx * difx + dify * dify + difz * difz + 1.0);
-        //double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
-        //return reward4position * reward4orientation;
+        double reward4position =  1/(difx * difx * difx * difx + dify * dify * dify * dify + difz * difz * difz * difz + 1.0);
+        double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
+        return reward4position * 0.9 + 0.1 * reward4orientation;
         return reward4position;
     }
 
@@ -255,11 +262,6 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(100);
 
     environmentTracker* tracker = new environmentTracker(n);
-
-    if(argc == 2) {
-        maxstep = atoi(argv[1]);
-    }
-
 
     ROS_INFO("Comunication node ready");
 
