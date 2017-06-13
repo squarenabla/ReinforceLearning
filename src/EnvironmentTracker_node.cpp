@@ -210,7 +210,7 @@ public:
         res.target_position = target_position;
         res.position = current_position;
         res.orientation = current_orientation;
-        
+        res.reward = 0.0;
         return true;
     }
 
