@@ -4,6 +4,7 @@ import sys
 import rospy
 from rotors_reinforce.srv import PerformAction
 from rotors_reinforce.srv import GetState
+from History import *
 
 import tensorflow as tf
 import random
@@ -98,67 +99,13 @@ class ComputationalGraph:
                 self.v_loss = tf.nn.l2_loss(self.v_diffs)
                 self.v_optimizer = tf.train.AdamOptimizer(self.v_lrate).minimize(self.v_loss)
 
-            with tf.variable_scope("Q-learning"):
-                self.ql_state = tf.placeholder(tf.float32, [1, state_size], name="ql_state")
-
-                # formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
-                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
-
-                self.ql_W1 = tf.get_variable("ql_W1", [state_size, action_num * action_size])
-                #self.ql_W2 = tf.Variable("ql_W2", [hid_neurons_num, action_num * action_size])
-
-                #self.ql_output1 = tf.matmul(self.ql_state, self.ql_W1)
-                self.ql_Q = tf.matmul(self.ql_state, self.ql_W1)
-                self.ql_computated_action = tf.argmax(self.ql_Q, axis=-1)
-
-                self.ql_Qnext = tf.placeholder(tf.float32, [1,action_num * action_size], name="ql_Qnext")
-                self.ql_loss = tf.reduce_sum(tf.square(self.ql_Qnext - self.ql_Q))
-                self.ql_optimizer = tf.train.AdamOptimizer(self.ql_lrate).minimize(self.ql_loss)
-
             self.constructSummary(sess)
 
         def constructSummary(self, sess):
-            #variable_summaries(self.po_W1)
-            # variable_summaries(self.po_W2)
-            #variable_summaries(self.po_b1)
-            # variable_summaries(self.po_b2)
-            #variable_summaries(self.v_W1)
-            #variable_summaries(self.v_W2)
-            #variable_summaries(self.v_b1)
-            #variable_summaries(self.v_b2)
-
             variable_summaries(self.episode_rewards)
-
-            #tf.summary.histogram('policy_output_1', self.po_output1)
-            #tf.summary.histogram('policy_softmax_probabilities', self.po_probabilities)
-
-
-            #tf.summary.scalar('episode_reward', self.episode_reward)
-            #tf.summary.scalar('policy_loss', self.po_loss)
-            #tf.summary.scalar('value_loss', self.v_loss)
-
             self.merged = tf.summary.merge_all()
-
             global _train_writer
             _train_writer = tf.summary.FileWriter('./log/train', sess.graph)
-
-        def qLearningPrediction(self, sess, state):
-            state_2D = np.expand_dims(state, axis=0)
-            action, Q = sess.run([self.ql_computated_action, self.ql_Q], feed_dict={self.ql_state: state_2D})
-            return action, Q
-
-        def getQ(self, sess, state):
-            state_2D = np.expand_dims(state, axis=0)
-            Q = sess.run(self.ql_Q, feed_dict={self.ql_state: state_2D})
-            return Q
-
-        def optimizeQ(self, sess, state, targetQ):
-            state_2D = np.expand_dims(state, axis=0)
-            _, W = sess.run([self.ql_optimizer, self.ql_W1], feed_dict={self.ql_state: state_2D,
-                                                                        self.ql_Qnext: targetQ})
-
-            print W
-            return
 
         def calculateAction(self, sess, state):
             state_one_hot_sequence = np.expand_dims(state, axis = 0)
@@ -188,45 +135,6 @@ class ComputationalGraph:
                 advantages.append(future_reward - prediction)
                 update_vals.append(future_reward)
 
-            ### DEBUGGING
-
-            # str(raw_input())
-            #
-            # print history.getStates()
-            # print len(history.getStates())
-            #
-            # str(raw_input())
-            #
-            # print history.getActions()
-            # print len(history.getActions())
-            #
-            # print advantages
-            # print len(advantages)
-            #
-            # assert (len(history.getActions()) == len(history.getStates()) == len(advantages)), \
-            #     "Size of action, state and reward arrays don't match (%i %i %i)" %(len(history.getActions()), \
-            #                                                                         len(history.getStates()), \
-            #                                                                         len(advantages))
-            #
-            # print sess.run(self.po_output3, feed_dict={self.po_state: history.getStates()}).shape
-            # print sess.run(self.po_probabilities, feed_dict={self.po_state: history.getStates()}).shape
-            # print sess.run(self.po_max_probabilities, feed_dict={self.po_state: history.getStates()}).shape
-            #
-            # str(raw_input())
-            # print sess.run(self.po_probabilities, feed_dict={self.po_state: history.getStates()})
-            #
-            # str(raw_input())
-            # print sess.run(self.po_eligibility, feed_dict={self.po_state: history.getStates(), self.po_prev_actions: history.getActions()})
-            #
-            # str(raw_input())
-            # print sess.run(self.po_loss, feed_dict={self.po_state: history.getStates(), self.po_prev_actions: history.getActions(), self.po_return: advantages})
-
-            #print history.getStates()
-
-            ### END_DEBUGGING
-            #episode_rewards = np.zeros(1)
-            #episode_rewards[0] = history.sumRewards()
-            #print history.sumRewards()
 
             sess.run(self.v_optimizer, feed_dict={self.v_state: history.getStates(),
                                                                             self.v_actual_return: np.expand_dims(update_vals, axis=1)})
@@ -235,70 +143,13 @@ class ComputationalGraph:
                                                                                   self.po_prev_actions: history.getActions(),
                                                                                   self.po_return: advantages,
                                                                                   self.episode_rewards: history.getRewardHistory()})
-            #_train_writer.add_summary(statistics, step)
-            #_train_writer.flush()
+            _train_writer.add_summary(statistics, step)
+            _train_writer.flush()
 
             print W1
             print W3
 
 
-
-class History:
-    def __init__(self):
-        self.states = []
-        self.actions = []
-        self.rewards = []
-        #examination is needed, whether to use return or not
-        #self.returnn = []
-
-    def addAction2History(self, action):
-        action_matrix = np.zeros((ACTION_NUM, ACTION_SIZE), dtype = np.float32)
-        for i, act in enumerate(action):
-            #print action[i], act
-            action_matrix[i][int(act)] = 1.0
-        self.actions.append(action_matrix)
-        #self.actions.append(action)
-
-    def getActions(self):
-        return self.actions
-
-    def getLastAction(self):
-        assert (len(self.actions) > 0), "Action history is empty!"
-        return self.actions[-1]
-
-    def addState2History(self, response):
-        #state = np.concatenate([response.position, response.velocity, response.target_position, response.orientation])
-        state = np.concatenate([response.position[2:], response.target_position[2:]])
-        self.states.append(state)
-
-    def getStates(self):
-        return self.states[:-1]
-
-    def getState(self, iterator):
-        assert (len(self.states) > 0), "State history is empty!"
-        return self.states[iterator]
-
-    def getLastState(self):
-        assert (len(self.states) > 0), "State history is empty!"
-        return self.states[-1]
-
-    def addReward2History(self, reward):
-        self.rewards.append(reward)
-
-    def getRewardHistory(self):
-        return self.rewards
-
-    def getLastReward(self):
-        assert (len(self.rewards) > 0), "Reward history is empty!"
-        return self.rewards[-1]
-
-    def sumRewards(self):
-        return sum(self.rewards)
-
-    def clean(self):
-        self.states = []
-        self.actions = []
-        self.rewards = []
 
 def reinforce_node():
 
@@ -307,7 +158,7 @@ def reinforce_node():
     perform_action_client = rospy.ServiceProxy('env_tr_perform_action', PerformAction)
     get_state_client = rospy.ServiceProxy('env_tr_get_state', GetState)
 
-    history = History()
+    history = History(ACTION_NUM, ACTION_SIZE)
 
     graph = ComputationalGraph()
 
@@ -392,103 +243,11 @@ def reinforce_node():
 
             #rewardList.append(total_reward)
 
-def qlearning_node():
-#set up env
-    rospy.init_node('qLearning', anonymous=True)
-    perform_action_client = rospy.ServiceProxy('env_tr_perform_action', PerformAction)
-    get_state_client = rospy.ServiceProxy('env_tr_get_state', GetState)
-
-    graph = ComputationalGraph()
-
-    action = np.zeros(ACTION_NUM)
-    executed_action = np.zeros(ACTION_NUM)
-
-    global sess
-    sess = tf.Session()
-
-    graph.constructGraph(sess, STATE_SIZE, ACTION_NUM, ACTION_SIZE)
-
-    global saver
-    saver = tf.train.Saver()
-
-    try:
-        saver.restore(sess, "./tmp/model.ckpt")
-        print "model restored"
-    except:
-        print "model isn't restored. random initialization"
-        init_op = tf.global_variables_initializer()
-        sess.run(init_op)
-
-    step = 0
-    maxstep = 100
-    e = 0.1
-    gamma = 0.99
-
-    # main loop:
-    while not rospy.is_shutdown():
-        crashed_flag = False
-
-        print "new episode"
-        #get initial state
-        print "Get initial state"
-        rospy.wait_for_service('env_tr_get_state')
-        try:
-            response = get_state_client()
-        except rospy.ServiceException, e:
-            print "Service call failed: %s" % e
-
-
-
-        # run episode, while not crashed and simulation is running
-        while not crashed_flag and not rospy.is_shutdown():
-            #get most probable variant to act for each action, and the probabilities
-
-            action, Q = graph.qLearningPrediction(sess, np.concatenate([response.position[2:], response.target_position[2:]]))
-
-            if np.random.rand(1) < e:
-                action[0] = np.random.randint(ACTION_SIZE)
-            else:
-                action[0] = int(action[0])
-
-            executed_action[0] = float(action[0]) / float(ACTION_SIZE - 1)
-
-            #print(executed_action)
-            rospy.wait_for_service('env_tr_perform_action')
-            try:
-                new_response = perform_action_client(executed_action)
-            except rospy.ServiceException, e:
-                print "Service call failed: %s" % e
-            #print(new_response)
-
-            Q1 = graph.getQ(sess, np.concatenate([new_response.position[2:], new_response.target_position[2:]]))
-
-            targetQ = Q
-            targetQ[0, action[0]] = response.reward + gamma * np.max(Q1)
-
-            graph.optimizeQ(sess, np.concatenate([response.position[2:], response.target_position[2:]]), targetQ)
-
-            response = new_response
-
-            crashed_flag = response.crashed
-
-            step = step + 1
-
-
-
-        maxstep = max(maxstep, step)
-        e = 1.0/((2 * step/(maxstep) + 10))
-        step = 0
-
-
-            #rewardList.append(total_reward)
-
-
 
 if __name__ == '__main__':
     try:
         print("starting...")
-        #reinforce_node()
-        qlearning_node()
+        reinforce_node()
     except rospy.ROSInterruptException:
         pass
  
