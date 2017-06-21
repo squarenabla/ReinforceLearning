@@ -6,6 +6,14 @@ from rotors_reinforce.srv import PerformAction
 from rotors_reinforce.srv import GetState
 from History import *
 
+import gym
+from gym import wrappers
+
+# env = gym.make('CartPole-v0')
+# env.render()
+# monitor = gym.wrappers.Monitor(env, 'cartpole/', force=True)
+
+
 import tensorflow as tf
 import random
 import numpy as np
@@ -13,9 +21,9 @@ import math
 
 
 #STATE_SIZE = 3 + 4 + 3 + 3
-STATE_SIZE = 1 + 1
+STATE_SIZE = 2
 ACTION_NUM = 1
-ACTION_SIZE = 3
+ACTION_SIZE = 7
 
 import atexit
 
@@ -45,8 +53,14 @@ def variable_summaries(var):
 class ComputationalGraph:
         def __init__(self):
             self.po_lrate = 0.01
+            self.po_learning_rate_minimum = 0.00025
             self.v_lrate = 0.1
-            self.ql_lrate = 0.1
+            self.v_learning_rate_minimum = 0.01
+            self.ql_lrate = 0.
+
+            self.global_step = tf.Variable(0, trainable=False)
+            self.po_decay_step = 50
+            self.v_decay_step = 30
 
         def constructGraph(self, sess, state_size, action_num, action_size):
             with tf.variable_scope("policy"):
@@ -56,16 +70,17 @@ class ComputationalGraph:
                 self.po_return = tf.placeholder(tf.float32, [None], name="po_return")
 
                 #formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
-                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                #hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                hid_neurons_num = 32
 
-                self.po_W1 = tf.get_variable("policy_W1", [state_size, hid_neurons_num])
-                self.po_b1 = tf.get_variable("policy_b1", [hid_neurons_num])
+                self.po_W1 = tf.get_variable("policy_W1", [state_size, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())
+                self.po_b1 = tf.get_variable("policy_b1", [hid_neurons_num], initializer=tf.constant_initializer(0.0))
 
-                # self.po_W2 = tf.get_variable("policy_W2", [hid_neurons_num, hid_neurons_num])
-                # self.po_b2 = tf.get_variable("policy_b2", [hid_neurons_num])
+                #self.po_W2 = tf.get_variable("policy_W2", [hid_neurons_num, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())
+                #self.po_b2 = tf.get_variable("policy_b2", [hid_neurons_num], initializer=tf.constant_initializer(0.0))
                 #
-                self.po_W3 = tf.get_variable("policy_W3", [hid_neurons_num, action_num * action_size])
-                self.po_b3 = tf.get_variable("policy_b3", [action_num * action_size])
+                self.po_W3 = tf.get_variable("policy_W3", [hid_neurons_num, action_num * action_size], initializer=tf.contrib.layers.xavier_initializer())
+                self.po_b3 = tf.get_variable("policy_b3", [action_num * action_size], initializer=tf.constant_initializer(0.0))
 
                 self.po_output1 = tf.nn.sigmoid(tf.nn.bias_add(tf.matmul(self.po_state, self.po_W1), self.po_b1))
                 #self.po_output2 = tf.nn.sigmoid(tf.nn.bias_add(tf.matmul(self.po_output1, self.po_W2), self.po_b2))
@@ -78,26 +93,52 @@ class ComputationalGraph:
                 #self.po_matr_prev_actions = tf.reshape(self.po_prev_actions, [-1, action_num, action_size])
                 self.po_eligibility = tf.log(tf.reduce_sum(tf.multiply(self.po_prev_actions, self.po_probabilities), -1))
                 self.po_loss = tf.multiply(-tf.reduce_sum(self.po_eligibility, -1), self.po_return)
-                self.po_optimizer = tf.train.AdamOptimizer(self.po_lrate).minimize(self.po_loss)
+
+
+
+                self.po_learning_rate_op = tf.maximum(self.po_learning_rate_minimum,
+                                                   tf.train.exponential_decay(
+                                                       self.po_lrate,
+                                                       self.global_step,
+                                                       self.po_decay_step,
+                                                       0.96,
+                                                       staircase=True))
+
+                self.po_optimizer = tf.train.AdamOptimizer(self.po_learning_rate_op).minimize(self.po_loss)
 
             with tf.variable_scope("value"):
                 self.v_state = tf.placeholder(tf.float32, [None, state_size], name="v_state")
                 self.v_actual_return = tf.placeholder(tf.float32, [None, 1], name="v_actual_return")
 
                 # formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
-                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                #hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                hid_neurons_num = 32
 
-                self.v_W1 = tf.get_variable("value_V1", [state_size, hid_neurons_num])
-                self.v_b1 = tf.get_variable("value_b1", [hid_neurons_num])
-                self.v_W2 = tf.get_variable("value_W2", [hid_neurons_num, 1])
-                self.v_b2 = tf.get_variable("value_b2", [1])
+                self.v_W1 = tf.get_variable("value_V1", [state_size, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())
+                self.v_b1 = tf.get_variable("value_b1", [hid_neurons_num], initializer=tf.constant_initializer(0.0))
+                self.v_W2 = tf.get_variable("value_W2", [hid_neurons_num, 1], initializer=tf.contrib.layers.xavier_initializer())
+                self.v_b2 = tf.get_variable("value_b2", [1], initializer=tf.constant_initializer(0.0))
+                self.v_W3 = tf.get_variable("value_W3", [hid_neurons_num, 1], initializer=tf.contrib.layers.xavier_initializer())
+                self.v_b3 = tf.get_variable("value_b3", [1], initializer=tf.constant_initializer(0.0))
+
                 # in the future, try to calculate return for for each action
 
                 self.v_output1 = tf.nn.bias_add(tf.matmul(self.v_state, self.v_W1), self.v_b1)
                 self.v_output2 = tf.nn.bias_add(tf.matmul(self.v_output1, self.v_W2), self.v_b2)
+                #self.v_output3 = tf.nn.bias_add(tf.matmul(self.v_output2, self.v_W3), self.v_b3)
+
                 self.v_diffs = self.v_output2 - self.v_actual_return
                 self.v_loss = tf.nn.l2_loss(self.v_diffs)
-                self.v_optimizer = tf.train.AdamOptimizer(self.v_lrate).minimize(self.v_loss)
+
+                self.v_learning_rate_op = tf.maximum(self.v_learning_rate_minimum,
+                                                   tf.train.exponential_decay(
+                                                       self.v_lrate,
+                                                       self.global_step,
+                                                       self.v_decay_step,
+                                                       0.96,
+                                                       staircase=True))
+
+                self.v_optimizer = tf.train.AdamOptimizer(self.v_learning_rate_op).minimize(self.v_loss)
 
             self.constructSummary(sess)
 
@@ -137,17 +178,21 @@ class ComputationalGraph:
 
 
             sess.run(self.v_optimizer, feed_dict={self.v_state: history.getStates(),
-                                                                            self.v_actual_return: np.expand_dims(update_vals, axis=1)})
+                                                  self.v_actual_return: np.expand_dims(update_vals, axis=1),
+                                                  self.global_step: step
+                                                  })
 
             statistics, _, W1, W3 = sess.run([self.merged, self.po_optimizer, self.po_W1, self.po_W3], feed_dict={self.po_state: history.getStates(),
-                                                                                  self.po_prev_actions: history.getActions(),
-                                                                                  self.po_return: advantages,
-                                                                                  self.episode_rewards: history.getRewardHistory()})
+                                                                                                                  self.po_prev_actions: history.getActions(),
+                                                                                                                  self.po_return: advantages,
+                                                                                                                  self.episode_rewards: history.getRewardHistory(),
+                                                                                                                  self.global_step: step
+                                                                                                                  })
             _train_writer.add_summary(statistics, step)
             _train_writer.flush()
 
-            print W1
-            print W3
+            #print W1
+            #print W3
 
 
 
@@ -163,7 +208,7 @@ def reinforce_node():
     graph = ComputationalGraph()
 
     action = np.zeros(ACTION_NUM)
-    executed_action = np.zeros(ACTION_NUM)
+    executed_action = np.zeros(3 + ACTION_NUM)
 
     global sess
     sess = tf.Session()
@@ -173,13 +218,17 @@ def reinforce_node():
     global saver
     saver = tf.train.Saver()
 
-    try:
-        saver.restore(sess, "./tmp/model.ckpt")
-        print "model restored"
-    except:
-        print "model isn't restored. random initialization"
-        init_op = tf.global_variables_initializer()
-        sess.run(init_op)
+    # try:
+    #     saver.restore(sess, "./tmp/model.ckpt")
+    #     print "model restored"
+    # except:
+    #     print "model isn't restored. random initialization"
+    #     init_op = tf.global_variables_initializer()
+    #     sess.run(init_op)
+
+    init_op = tf.global_variables_initializer()
+    sess.run(init_op)
+
 
     step = 0
 
@@ -187,17 +236,23 @@ def reinforce_node():
     while not rospy.is_shutdown():
         crashed_flag = False
 
-        print "new episode"
+        #print "new episode"
         #get initial state
-        print "Get initial state"
+        #print "Get initial state"
         rospy.wait_for_service('env_tr_get_state')
         try:
             response = get_state_client()
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e
 
+        # state = env.reset()
+        old_position = 0
+
+        state = np.concatenate([[response.target_position[2] - response.position[2]], [response.position[2] - old_position]])
+        old_position = response.position[2]
+
         history.clean()
-        history.addState2History(response)
+        history.addState2History(state)
 
         # run episode, while not crashed and simulation is running
         while not crashed_flag and not rospy.is_shutdown():
@@ -212,12 +267,14 @@ def reinforce_node():
                 else:
                     action[i] = int(computed_action[0][i])
 
+            #state, reward, done, info = env.step(int(action[0]))
+
             # executed_action[0] = (float(action[0]) - 3.0) * 2.0 / float(ACTION_SIZE - 1)
             # executed_action[1] = (float(action[1]) - 3.0) * 2.0 / float(ACTION_SIZE - 1)
             # executed_action[2] = (float(action[2]) - 3.0)
             # executed_action[3] = float(action[3]) / float(ACTION_SIZE - 1)
 
-            executed_action[0] = float(action[0]) / float(ACTION_SIZE - 1)
+            executed_action[3] = float(action[0]) / float(ACTION_SIZE - 1)
 
             #execute action
             #print(action)
@@ -229,9 +286,12 @@ def reinforce_node():
                 print "Service call failed: %s" % e
             #print(response)
 
+            state = np.concatenate([[response.target_position[2] - response.position[2]], [response.position[2] - old_position]])
+            old_position = response.position[2]
+
             #update history
             history.addAction2History(action)
-            history.addState2History(response)
+            history.addState2History(state)
             history.addReward2History(response.reward)
 
             crashed_flag = response.crashed
@@ -239,6 +299,7 @@ def reinforce_node():
         #update policy
         graph.updatePolicy(sess, history, step)
 
+        print step
         step = step + 1
 
             #rewardList.append(total_reward)
@@ -250,4 +311,4 @@ if __name__ == '__main__':
         reinforce_node()
     except rospy.ROSInterruptException:
         pass
- 
+
