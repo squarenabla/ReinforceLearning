@@ -1,7 +1,8 @@
 #include <unistd.h>
 #include <math.h>
+#include <stdlib.h>
 
-
+#include <cmath>
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -49,8 +50,11 @@ private:
     ros::ServiceServer get_state_srv;
 
     int step_counter;
+    int delay;
     double current_yaw_vel_;
     bool crashed_flag;
+
+    double prev_distance;
 
 public:
     std::vector<double> current_position;
@@ -59,15 +63,18 @@ public:
 
     std::vector<double> target_position;
 
-    environmentTracker(ros::NodeHandle node) {
+    environmentTracker(ros::NodeHandle node, const int d) {
     	current_position.resize(3);
         //hard constants for target
         target_position = {0.0, 0.0, 5.0};
     	current_orientation.resize(4);
         current_control_params.resize(4, 0);
     	step_counter = 0;
+        delay = d;
 
         current_yaw_vel_ = 0.0;
+
+        prev_distance = 5.0;
 
         n = node;
         firefly_control_pub = n.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", 1000);
@@ -94,6 +101,8 @@ public:
         current_position = {0,0,0};
         current_orientation = {0,0,0,0};
         step_counter = 0;
+
+        prev_distance = 5.0;
 
         current_control_params.resize(4, 0);
 
@@ -187,7 +196,7 @@ public:
 
         unpausePhysics();
         firefly_control_pub.publish(msg);
-        usleep(50000);
+        usleep(delay);
     	getPosition();
         pausePhysics();
 
@@ -195,6 +204,7 @@ public:
         res.position = current_position;
         res.orientation = current_orientation;
         res.reward = getReward(step_counter);
+        res.crashed = false;
 
         //crash check at the end        
         if(crashed_flag) {
@@ -211,6 +221,7 @@ public:
         res.position = current_position;
         res.orientation = current_orientation;
         res.reward = 0.0;
+        res.crashed = crashed_flag;
         return true;
     }
 
@@ -238,15 +249,39 @@ public:
         double dify = current_position[1] - target_position[1];
         double difz = current_position[2] - target_position[2];
 
+        double current_distance = std::sqrt(difx * difx + dify * dify + difz * difz);
+ 
+        double reward = 0.0;
+
         if (crashed_flag) {
             return 0.0;
         }
 
-        //ROS_INFO("diffs^2: %f %f %f", difx * difx, dify * dify, difz * difz);
+
         double reward4position =  1/(difx * difx * difx * difx + dify * dify * dify * dify + difz * difz * difz * difz + 1.0);
         double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
-        return reward4position * 0.9 + 0.1 * reward4orientation;
-        return reward4position;
+    
+        reward = 0.9 * reward4position + 0.1 * reward4orientation;
+
+
+        //if(current_distance < prev_distance) {
+            // double reward4position =  1/(difx * difx * difx * difx + dify * dify * dify * dify + difz * difz * difz * difz + 1.0);
+            // double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
+        
+            // reward = reward4position * 0.9 + 0.1 * reward4orientation;
+        //    prev_distance = current_distance;
+        // }
+        // else {
+        //     reward = 0.0;
+        //     prev_distance = current_distance;
+        // }
+        
+        // if(current_distance < 1.0) {
+        //     reward = 2;
+        // }
+
+
+        return reward;
     }
 
 };
@@ -261,12 +296,18 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(100);
 
-    environmentTracker* tracker = new environmentTracker(n);
+    int delaytime = 50000;
+
+    if(argc > 1) {
+        delaytime = atoi(argv[1]);        
+    }
+
+    environmentTracker tracker(n, delaytime);
 
     ROS_INFO("Comunication node ready");
 
     ros::spin();
 
-    delete tracker;
+    //delete tracker;
     return 0;
 }

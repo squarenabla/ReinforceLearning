@@ -2,7 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cb8005a2-3437-4944-9080-2a67e6617a20" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/ReinforceLearning_node.py" afterPath="$PROJECT_DIR$/scripts/ReinforceLearning_node.py" />
+      <change type="DELETED" beforePath="$USER_HOME$/Study2/lab/exercise2/cartpole/openaigym.episode_batch.0.12169.stats.json" afterPath="" />
+      <change type="DELETED" beforePath="$USER_HOME$/Study2/lab/exercise2/cartpole/openaigym.manifest.0.12169.manifest.json" afterPath="" />
+      <change type="DELETED" beforePath="$USER_HOME$/Study2/lab/exercise2/test.tar.gz" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/train/events.out.tfevents.1497368330.tobias-Lenovo-Yoga710-14ISK" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/log/train/events.out.tfevents.1497369815.tobias-Lenovo-Yoga710-14ISK" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tmp/model.ckpt.data-00000-of-00001" afterPath="$PROJECT_DIR$/tmp/model.ckpt.data-00000-of-00001" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tmp/model.ckpt.index" afterPath="$PROJECT_DIR$/tmp/model.ckpt.index" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tmp/model.ckpt.meta" afterPath="$PROJECT_DIR$/tmp/model.ckpt.meta" />
+      <change type="MODIFICATION" beforePath="$USER_HOME$/Study2/lab/exercise2/Q-learning.py" afterPath="$USER_HOME$/Study2/lab/exercise2/Q-learning.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/rotors_reinforce.iml" afterPath="$PROJECT_DIR$/.idea/rotors_reinforce.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/QLearning_node.py" afterPath="$PROJECT_DIR$/scripts/QLearning_node.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/EnvironmentTracker_node.cpp" afterPath="$PROJECT_DIR$/src/EnvironmentTracker_node.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/srv/GetState.srv" afterPath="$PROJECT_DIR$/srv/GetState.srv" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/urdf/mav.gazebo" afterPath="$PROJECT_DIR$/urdf/mav.gazebo" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -11,14 +27,19 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/rotors_reinforce$QLearning_node.coverage" NAME="QLearning_node Coverage Results" MODIFIED="1497959231305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/rotors_reinforce$agent.coverage" NAME="agent Coverage Results" MODIFIED="1497972906124" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/DQN-tensorflow/dqn" />
+    <SUITE FILE_PATH="coverage/rotors_reinforce$main.coverage" NAME="main Coverage Results" MODIFIED="1497973014680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/DQN-tensorflow" />
+  </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="ReinforceLearning_node.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ReinforceLearning_node.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="522">
-              <caret line="29" column="33" lean-forward="false" selection-start-line="29" selection-start-column="33" selection-end-line="29" selection-end-column="33" />
+            <state relative-caret-position="472">
+              <caret line="292" column="25" lean-forward="true" selection-start-line="292" selection-start-column="25" selection-end-line="292" selection-end-column="25" />
               <folding>
                 <element signature="e#23#33#0" expanded="true" />
               </folding>
@@ -26,21 +47,97 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="History.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/History.py">
+      <file leaf-file-name="learning_rate_decay.py" pinned="false" current-in-tab="false">
+        <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/training/learning_rate_decay.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+            <state relative-caret-position="900">
+              <caret line="57" column="42" lean-forward="false" selection-start-line="57" selection-start-column="31" selection-end-line="57" selection-end-column="42" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="summary.py" pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/summary/summary.py">
+      <file leaf-file-name="multiarray.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.PyCharm2017.1/system/python_stubs/-1247972723/numpy/core/multiarray.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4158">
-              <caret line="261" column="36" lean-forward="false" selection-start-line="261" selection-start-column="36" selection-end-line="261" selection-end-column="36" />
+            <state relative-caret-position="40104">
+              <caret line="2228" column="17" lean-forward="false" selection-start-line="2228" selection-start-column="17" selection-end-line="2228" selection-end-column="17" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="History.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/History.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-158">
+              <caret line="14" column="8" lean-forward="false" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="QLearning_node.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/QLearning_node.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="303" column="4" lean-forward="false" selection-start-line="437" selection-start-column="12" selection-end-line="437" selection-end-column="19" />
+              <folding>
+                <element signature="e#23#34#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Q-learning.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/Study2/lab/exercise2/Q-learning.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2016">
+              <caret line="115" column="57" lean-forward="false" selection-start-line="115" selection-start-column="51" selection-end-line="115" selection-end-column="57" />
+              <folding>
+                <element signature="e#132#142#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="agent.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/agent.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2682">
+              <caret line="161" column="76" lean-forward="false" selection-start-line="161" selection-start-column="70" selection-end-line="161" selection-end-column="76" />
+              <folding>
+                <element signature="e#0#37#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="replay_memory.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/replay_memory.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="504">
+              <caret line="33" column="7" lean-forward="false" selection-start-line="33" selection-start-column="7" selection-end-line="33" selection-end-column="7" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="history.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/history.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="54">
+              <caret line="3" column="6" lean-forward="false" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/DQN-tensorflow/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="252">
+              <caret line="20" column="36" lean-forward="false" selection-start-line="20" selection-start-column="36" selection-end-line="20" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -58,7 +155,26 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>global_step</find>
+      <find>depth</find>
+      <find>new_state</find>
+      <find>lea</find>
+      <find>self.step</find>
+      <find>mem</find>
+      <find>target_q_update_step</find>
+      <find>learning_rate</find>
+      <find>ql_actions</find>
+      <find>SCALE</find>
+      <find>hid_neurons_num</find>
+      <find>ql_</find>
+      <find>initializer</find>
+      <find>extend</find>
+      <find>staircase</find>
     </findStrings>
+    <replaceStrings>
+      <replace>self.hid_neurons_num</replace>
+      <replace>t_</replace>
+      <replace>append</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -67,9 +183,12 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/scripts/test" />
+        <option value="$PROJECT_DIR$/QLearning_node.py" />
+        <option value="$USER_HOME$/DQN-tensorflow/config.py" />
+        <option value="$USER_HOME$/DQN-tensorflow/main.py" />
+        <option value="$PROJECT_DIR$/scripts/QLearning_node.py" />
         <option value="$PROJECT_DIR$/scripts/History.py" />
         <option value="$PROJECT_DIR$/scripts/ReinforceLearning_node.py" />
-        <option value="$PROJECT_DIR$/QLearning_node.py" />
       </list>
     </option>
   </component>
@@ -80,10 +199,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="64" />
-    <option name="y" value="-11" />
-    <option name="width" value="1857" />
-    <option name="height" value="1092" />
+    <option name="x" value="65" />
+    <option name="y" value="-4" />
+    <option name="width" value="1301" />
+    <option name="height" value="772" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -101,6 +220,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -109,7 +230,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="rotors_reinforce" />
+              <option name="myItemId" value="exercise2" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -119,22 +240,30 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="DQN-tensorflow" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
               <option name="myItemId" value="rotors_reinforce" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="DQN-tensorflow" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="scripts" />
+              <option name="myItemId" value="dqn" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/Study2/lab/exercise2" />
+    <property name="last_opened_file_path" value="$USER_HOME$/DQN-tensorflow" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
@@ -150,7 +279,165 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.main">
+    <configuration default="false" name="QLearning_node" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="rotors_reinforce" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/QLearning_node.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="agent" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/DQN-tensorflow/dqn" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DQN-tensorflow" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/DQN-tensorflow/dqn/agent.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/DQN-tensorflow" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="DQN-tensorflow" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/DQN-tensorflow/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="rotors_reinforce" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="ErlangApplicationRunConfiguration" factoryName="Erlang Application" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="debugOptions">
+        <ErlangDebugOptions>
+          <option name="autoUpdateModulesNotToInterpret" value="true" />
+          <option name="modulesNotToInterpret">
+            <set />
+          </option>
+        </ErlangDebugOptions>
+      </option>
+      <option name="erlFlags" value="" />
+      <option name="moduleAndFunction" value="" />
+      <option name="params" value="" />
+      <option name="useTestCodePath" value="false" />
+      <option name="workDirectory" />
+      <module />
+      <method />
+    </configuration>
+    <configuration default="true" type="ErlangUnitRunConfigurationType" factoryName="Erlang Eunit" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="debugOptions">
+        <ErlangDebugOptions>
+          <option name="autoUpdateModulesNotToInterpret" value="true" />
+          <option name="modulesNotToInterpret">
+            <set />
+          </option>
+        </ErlangDebugOptions>
+      </option>
+      <option name="workDirectory" />
+      <module />
+      <option name="functionNames">
+        <set />
+      </option>
+      <option name="kind" value="MODULE" />
+      <option name="moduleNames">
+        <set />
+      </option>
+      <method />
+    </configuration>
+    <configuration default="true" type="JavaScriptTestRunnerJest" factoryName="Jest">
+      <node-interpreter value="project" />
+      <working-dir value="" />
+      <envs />
+      <scope-kind value="ALL" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavaScriptTestRunnerProtractor" factoryName="Protractor">
+      <config-file value="" />
+      <node-interpreter value="project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
+      <method />
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="rotors_reinforce" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PyLettuceRunConfigurationType" factoryName="Lettuce">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="rotors_reinforce" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -170,6 +457,12 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
+    <configuration default="true" type="RebarEunitRunConfigurationType" factoryName="Erlang Rebar Eunit" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="command" value="eunit" />
+      <option name="skipDependencies" value="true" />
+      <module />
+      <method />
+    </configuration>
     <configuration default="true" type="Tox" factoryName="Tox">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -181,6 +474,22 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <module name="rotors_reinforce" />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.npm" factoryName="npm">
+      <command value="run" />
+      <scripts />
+      <node-interpreter value="project" />
+      <envs />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
@@ -236,6 +545,18 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method />
     </configuration>
+    <list size="3">
+      <item index="0" class="java.lang.String" itemvalue="Python.QLearning_node" />
+      <item index="1" class="java.lang.String" itemvalue="Python.agent" />
+      <item index="2" class="java.lang.String" itemvalue="Python.main" />
+    </list>
+    <recent_temporary>
+      <list size="3">
+        <item index="0" class="java.lang.String" itemvalue="Python.main" />
+        <item index="1" class="java.lang.String" itemvalue="Python.agent" />
+        <item index="2" class="java.lang.String" itemvalue="Python.QLearning_node" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -251,19 +572,20 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="64" y="-11" width="1857" height="1092" extended-state="6" />
+    <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20323451" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20522675" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.06552262" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -271,30 +593,8 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
-    <layout-to-restore>
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20323451" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="processedProjectFiles" value="true" />
@@ -304,11 +604,103 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/training/rmsprop.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="52" column="89" lean-forward="false" selection-start-line="52" selection-start-column="18" selection-end-line="52" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/training/learning_rate_decay.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="828">
+          <caret line="53" column="51" lean-forward="false" selection-start-line="53" selection-start-column="48" selection-end-line="53" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1818">
+          <caret line="101" column="45" lean-forward="false" selection-start-line="101" selection-start-column="35" selection-end-line="101" selection-end-column="45" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="33" column="20" lean-forward="false" selection-start-line="33" selection-start-column="11" selection-end-line="33" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/numpy/core/shape_base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3258">
+          <caret line="181" column="51" lean-forward="false" selection-start-line="181" selection-start-column="51" selection-end-line="181" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/variable_scope.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17730">
+          <caret line="1004" column="14" lean-forward="false" selection-start-line="1004" selection-start-column="3" selection-end-line="1004" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/array_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="35730">
+          <caret line="1985" column="19" lean-forward="false" selection-start-line="1985" selection-start-column="12" selection-end-line="1985" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/QLearning_node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4410">
+          <caret line="245" column="31" lean-forward="true" selection-start-line="245" selection-start-column="22" selection-end-line="245" selection-end-column="31" />
+          <folding>
+            <element signature="e#23#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ReinforceLearning_node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="522">
+          <caret line="29" column="33" lean-forward="false" selection-start-line="29" selection-start-column="33" selection-end-line="29" selection-end-column="33" />
+          <folding>
+            <element signature="e#23#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/summary/summary.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4158">
+          <caret line="261" column="36" lean-forward="false" selection-start-line="261" selection-start-column="36" selection-end-line="261" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/History.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ReinforceLearning_node.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -424,36 +816,189 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/test" />
     <entry file="file://$USER_HOME$/.PyCharm2017.1/system/python_stubs/-1247972723/math.py" />
+    <entry file="file://$PROJECT_DIR$/QLearning_node.py" />
     <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/summary/summary.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4158">
+        <state relative-caret-position="846">
           <caret line="261" column="36" lean-forward="false" selection-start-line="261" selection-start-column="36" selection-end-line="261" selection-end-column="36" />
           <folding />
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/variable_scope.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17730">
+          <caret line="1004" column="14" lean-forward="false" selection-start-line="1004" selection-start-column="3" selection-end-line="1004" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/theano/gpuarray/tests/rnn_support.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2106">
+          <caret line="22" column="0" lean-forward="true" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/numpy/core/shape_base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3258">
+          <caret line="181" column="51" lean-forward="false" selection-start-line="181" selection-start-column="51" selection-end-line="181" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/math_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="213">
+          <caret line="167" column="4" lean-forward="false" selection-start-line="167" selection-start-column="4" selection-end-line="167" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/array_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="35316">
+          <caret line="1985" column="19" lean-forward="false" selection-start-line="1985" selection-start-column="12" selection-end-line="1985" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="33" column="20" lean-forward="false" selection-start-line="33" selection-start-column="11" selection-end-line="33" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/training/rmsprop.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="52" column="89" lean-forward="false" selection-start-line="52" selection-start-column="18" selection-end-line="52" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="21" column="20" lean-forward="true" selection-start-line="21" selection-start-column="20" selection-end-line="21" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="35" column="0" lean-forward="false" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/variables.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="213">
+          <caret line="427" column="6" lean-forward="false" selection-start-line="427" selection-start-column="6" selection-end-line="427" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/platform/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="648">
+          <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="20" column="36" lean-forward="false" selection-start-line="20" selection-start-column="36" selection-end-line="20" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/history.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="6" lean-forward="false" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/replay_memory.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="33" column="7" lean-forward="false" selection-start-line="33" selection-start-column="7" selection-end-line="33" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Study2/lab/exercise2/Q-learning.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2016">
+          <caret line="115" column="57" lean-forward="false" selection-start-line="115" selection-start-column="51" selection-end-line="115" selection-end-column="57" />
+          <folding>
+            <element signature="e#132#142#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/DQN-tensorflow/dqn/agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2682">
+          <caret line="161" column="76" lean-forward="false" selection-start-line="161" selection-start-column="70" selection-end-line="161" selection-end-column="76" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.1/system/python_stubs/-1247972723/time.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="121" column="4" lean-forward="false" selection-start-line="121" selection-start-column="4" selection-end-line="121" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.1/system/python_stubs/-1247972723/numpy/core/multiarray.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="40104">
+          <caret line="2228" column="17" lean-forward="false" selection-start-line="2228" selection-start-column="17" selection-end-line="2228" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/training/learning_rate_decay.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="900">
+          <caret line="57" column="42" lean-forward="false" selection-start-line="57" selection-start-column="31" selection-end-line="57" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/QLearning_node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="303" column="4" lean-forward="false" selection-start-line="437" selection-start-column="12" selection-end-line="437" selection-end-column="19" />
+          <folding>
+            <element signature="e#23#34#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ReinforceLearning_node.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="29" column="33" lean-forward="false" selection-start-line="29" selection-start-column="33" selection-end-line="29" selection-end-column="33" />
+        <state relative-caret-position="472">
+          <caret line="292" column="25" lean-forward="true" selection-start-line="292" selection-start-column="25" selection-end-line="292" selection-end-column="25" />
           <folding>
             <element signature="e#23#33#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/QLearning_node.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="208" column="0" lean-forward="true" selection-start-line="208" selection-start-column="0" selection-end-line="208" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/History.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+        <state relative-caret-position="-158">
+          <caret line="14" column="8" lean-forward="false" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
           <folding />
         </state>
       </provider>

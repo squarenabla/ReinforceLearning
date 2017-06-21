@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/DQN-tensorflow/.idea/DQN-tensorflow.iml" filepath="$USER_HOME$/DQN-tensorflow/.idea/DQN-tensorflow.iml" />
       <module fileurl="file://$USER_HOME$/Study2/lab/exercise2/.idea/exercise2.iml" filepath="$USER_HOME$/Study2/lab/exercise2/.idea/exercise2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/rotors_reinforce.iml" filepath="$PROJECT_DIR$/.idea/rotors_reinforce.iml" />
     </modules>
