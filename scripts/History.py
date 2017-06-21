@@ -27,9 +27,10 @@ class History:
         assert (len(self.actions) > 0), "Action history is empty!"
         return self.actions[-1]
 
-    def addState2History(self, response):
+    def addState2History(self, state):
         #state = np.concatenate([response.position, response.velocity, response.target_position, response.orientation])
-        state = np.concatenate([response.position[2:], response.target_position[2:]])
+        #state = np.concatenate([response.position[2:], response.target_position[2:]])
+        # state = response
         self.states.append(state)
 
     def getStates(self):
