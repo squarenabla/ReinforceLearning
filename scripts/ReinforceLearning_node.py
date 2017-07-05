@@ -63,15 +63,15 @@ def variable_summaries(var):
 
 class ComputationalGraph:
         def __init__(self):
-            self.po_lrate = 0.2
-            self.po_learning_rate_minimum = 0.005
-            self.v_lrate = 1.
-            self.v_learning_rate_minimum = 0.03
+            self.po_lrate = 0.05
+            self.po_learning_rate_minimum = 0.01
+            self.v_lrate = 0.5
+            self.v_learning_rate_minimum = 0.1
             self.ql_lrate = 0.
 
             self.global_step = tf.Variable(0, trainable=False)
-            self.po_decay_step = 50
-            self.v_decay_step = 50
+            self.po_decay_step = 100
+            self.v_decay_step = 100
 
         def constructGraph(self, sess, state_size, action_num, action_size):
             with tf.variable_scope("policy"):

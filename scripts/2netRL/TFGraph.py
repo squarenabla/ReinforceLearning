@@ -26,8 +26,8 @@ class ComputationalGraph:
                 self.po_return = tf.placeholder(tf.float32, [None], name="po_return")
 
                 #formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
-                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
-                #hid_neurons_num = 32
+                #hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                hid_neurons_num = 50
 
                 self.po_W1 = tf.get_variable("policy_W1", [state_size, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())
                 self.po_b1 = tf.get_variable("policy_b1", [hid_neurons_num], initializer=tf.constant_initializer(0.0))
@@ -68,6 +68,7 @@ class ComputationalGraph:
 
                 # formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
                 hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                hid_neurons_num = 50
                 #hid_neurons_num = 32
 
                 self.v_W1 = tf.get_variable("value_V1", [state_size, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())

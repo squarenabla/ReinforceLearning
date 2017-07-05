@@ -69,7 +69,7 @@ public:
     environmentTracker(ros::NodeHandle node, const int d) {
     	current_position.resize(3);
         //hard constants for target
-        target_position = {3.0, 1.0, 7.0};
+        target_position = {3.0, 1.0, 5.0};
     	current_orientation.resize(4);
         current_control_params.resize(4, 0);
     	step_counter = 0;
@@ -115,7 +115,10 @@ public:
 
         //target_position = {0.0 + dis(gen), 0.0 + dis(gen), 0.0 + dis(gen)};
         
-        target_position = {0.0 + dis(gen), 0.0 + dis(gen), 5.0};
+        //target_position = {0.0 + dis(gen), 0.0 + dis(gen), 5.0};
+
+        target_position = {3.0, 1.0, 5.0};
+
 
         ROS_INFO("Target: %f %f %f", target_position[0], target_position[1], target_position[2]);
 
@@ -224,7 +227,7 @@ public:
         //crash check at the end  
 
         ROS_INFO("step %i", step_counter);
-        if(step_counter > 300) {
+        if(step_counter > 3000) {
             crashed_flag = true;
             respawn();
         }
@@ -323,7 +326,7 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(100);
 
-    int delaytime = 50000;
+    int delaytime = 5000;
 
     if(argc > 1) {
         delaytime = atoi(argv[1]);        

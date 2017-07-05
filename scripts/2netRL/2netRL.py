@@ -26,7 +26,7 @@ import math
 #STATE_SIZE = 3 + 4 + 3 + 3
 STATE_SIZE = 2 * 2
 ACTION_NUM = 1
-ACTION_SIZE = 4 + 1
+ACTION_SIZE = 4
 
 import atexit
 
@@ -188,16 +188,16 @@ def reinforce_node():
 
             executed_action = np.zeros(4)
 
-            if  action[0] == 1:
+            if  action[0] == 0:
                 executed_action[0] = -1.0
 
-            if  action[0] == 2:
+            if  action[0] == 1:
                 executed_action[0] = 1.0
 
-            if  action[0] == 3:
+            if  action[0] == 2:
                 executed_action[1] = -1.0
 
-            if  action[0] == 4:
+            if  action[0] == 3:
                 executed_action[1] = 1.0
 
             # if  action[0] == 5:
