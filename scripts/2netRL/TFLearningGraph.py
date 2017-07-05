@@ -2,13 +2,13 @@ import tensorflow as tf
 import numpy as np
 import math
 
+from ExperienceBuffer import *
 
-
-class PlayGraph:
+class LearnGraph:
         def __init__(self, config, scope = ''):
             self.scope = scope
 
-            self.config = config
+            self.batch_size = config.batch_size
             self.po_lrate = config.po_lrate
             self.po_learning_rate_minimum = config.po_learning_rate_minimum
             self.v_lrate = config.v_lrate
@@ -26,8 +26,8 @@ class PlayGraph:
                 self.po_return = tf.placeholder(tf.float32, [None], name="po_return")
 
                 #formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
-                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
-                #hid_neurons_num = 32
+                #hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                hid_neurons_num = 100
 
                 self.po_W1 = tf.get_variable("policy_W1", [state_size, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())
                 self.po_b1 = tf.get_variable("policy_b1", [hid_neurons_num], initializer=tf.constant_initializer(0.0))
@@ -64,11 +64,11 @@ class PlayGraph:
 
             with tf.variable_scope(self.scope + "value"):
                 self.v_state = tf.placeholder(tf.float32, [None, state_size], name="v_state")
-                self.v_actual_return = tf.placeholder(tf.float32, [None, 1], name="v_actual_return")
+                self.v_actual_return = tf.placeholder(tf.float32, [None], name="v_actual_return")
 
                 # formula to compute number of neurons in the hidden layer: Nmin = 2*sqrt(in * out)
-                hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
-                #hid_neurons_num = 32
+                #hid_neurons_num = 2 * int(math.sqrt(state_size * action_num * action_size)) + 2
+                hid_neurons_num = 100
 
                 self.v_W1 = tf.get_variable("value_V1", [state_size, hid_neurons_num], initializer=tf.contrib.layers.xavier_initializer())
                 self.v_b1 = tf.get_variable("value_b1", [hid_neurons_num], initializer=tf.constant_initializer(0.0))
@@ -96,19 +96,6 @@ class PlayGraph:
 
                 self.v_optimizer = tf.train.AdamOptimizer(self.v_learning_rate_op).minimize(self.v_loss)
 
-            if (self.scope != ''):
-                with tf.variable_scope(self.scope + "statistics"):
-                    self.episode_rewards = tf.placeholder(tf.float32, [None], name="episode_rewards")
-                    print self.episode_rewards.name
-                    self.variable_summaries(self.episode_rewards)
-                    self.merged = tf.summary.merge_all()
-#            self.constructSummary(sess)
-
-        # def constructSummary(self, sess):
-        #     self.variable_summaries(self.episode_rewards)
-        #     self.merged = tf.summary.merge_all()
-
-
         def calculateAction(self, sess, state):
             state_one_hot_sequence = np.expand_dims(state, axis = 0)
             action = sess.run(self.po_computed_actions, feed_dict={self.po_state : state_one_hot_sequence})
@@ -120,56 +107,21 @@ class PlayGraph:
             reward = sess.run(self.v_output3, feed_dict={self.v_state: state_one_hot_sequence})
             return reward[0][0]
 
-        def updatePolicy(self, sess, history, step):
-            rewards = history.getRewardHistory()
-            advantages = []
-            update_vals = []
+        def calculateRewards(self, sess, states):
+            rewards = sess.run(self.v_output3, feed_dict={self.v_state: states})
+            return rewards[0]
 
-            for i, reward in enumerate(rewards):
-                future_reward = 0
-                future_transitions = len(rewards) - i
-                decrease = 1
-                for index2 in xrange(future_transitions):
-                    future_reward += rewards[(index2) + i]
-                    decrease = decrease * 0.97
+        def updatePolicy(self, sess, buffer, step):
+            states, actions, advantages, future_reward = buffer.sample(self.batch_size)
 
-                prediction = self.calculateReward(sess, history.getState(i))
-                advantages.append(future_reward - prediction)
-                update_vals.append(future_reward)
-
-            print self.episode_rewards.name
-
-            _, v_lr = sess.run([self.v_optimizer, self.v_learning_rate_op], feed_dict={self.v_state: history.getStates(),
-                                                                                       self.v_actual_return: np.expand_dims(update_vals, axis=1),
+            _, v_lr = sess.run([self.v_optimizer, self.v_learning_rate_op], feed_dict={self.v_state: states,
+                                                                                       self.v_actual_return: future_reward,
                                                                                        self.global_step: step
                                                                                        })
 
-            statistics, _, W1, W3, p_lr = sess.run([self.merged, self.po_optimizer, self.po_W1, self.po_W3, self.po_learning_rate_op], feed_dict={self.po_state: history.getStates(),
-                                                                                                                                                  self.po_prev_actions: history.getActions(),
-                                                                                                                                                  self.po_return: advantages,
-                                                                                                                                                  self.episode_rewards: history.getRewardHistory(),
-                                                                                                                                                  self.global_step: step
-                                                                                                                                                  })
-            # _train_writer.add_summary(statistics, step)
-            # _train_writer.flush()
-
-            print "l rates", v_lr, p_lr
-            return statistics
-            #print W1
-            #print W3
-
-        def variable_summaries(self, var):
-            """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
-
-            print var.name
-            with tf.variable_scope(self.scope + 'summaries'):
-                mean = tf.reduce_mean(var)
-                print var.name
-                tf.summary.scalar('mean', mean)
-                with tf.variable_scope(self.scope + 'stddev'):
-                    stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-                tf.summary.scalar('stddev', stddev)
-                tf.summary.scalar('max', tf.reduce_max(var))
-                tf.summary.scalar('min', tf.reduce_min(var))
-                tf.summary.histogram('histogram', var)
-                tf.summary.scalar('sum', tf.reduce_sum(var))
+            _, W1, W3, p_lr = sess.run([self.po_optimizer, self.po_W1, self.po_W3, self.po_learning_rate_op], feed_dict={self.po_state: states,
+                                                                                                                         self.po_prev_actions: actions,
+                                                                                                                         self.po_return: advantages,
+                                                                                                                         self.global_step: step
+                                                                                                                         })
+            return

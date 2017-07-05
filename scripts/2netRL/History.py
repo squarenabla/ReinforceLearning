@@ -47,7 +47,7 @@ class History:
     def addReward2History(self, reward):
         self.rewards.append(reward)
 
-    def getRewardHistory(self):
+    def getReward(self):
         return self.rewards
 
     def getLastReward(self):

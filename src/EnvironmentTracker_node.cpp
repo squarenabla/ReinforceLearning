@@ -227,7 +227,7 @@ public:
         //crash check at the end  
 
         ROS_INFO("step %i", step_counter);
-        if(step_counter > 3000) {
+        if(step_counter > 300) {
             crashed_flag = true;
             respawn();
         }
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(100);
 
-    int delaytime = 5000;
+    int delaytime = 50000;
 
     if(argc > 1) {
         delaytime = atoi(argv[1]);        
