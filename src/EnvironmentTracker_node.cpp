@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <random>
 
 #include "ros/ros.h"
 #include "mav_msgs/default_topics.h"
@@ -19,6 +20,7 @@
 
 #include "rotors_reinforce/PerformAction.h"
 #include "rotors_reinforce/GetState.h"
+#include "rotors_reinforce/SetTarget.h"
 
 #include <sstream>
 
@@ -48,6 +50,7 @@ private:
     ros::Subscriber firefly_ground_collision_sub;
     ros::ServiceServer perform_action_srv;
     ros::ServiceServer get_state_srv;
+    ros::ServiceServer set_target_srv;
 
     int step_counter;
     int delay;
@@ -66,7 +69,7 @@ public:
     environmentTracker(ros::NodeHandle node, const int d) {
     	current_position.resize(3);
         //hard constants for target
-        target_position = {0.0, 0.0, 5.0};
+        target_position = {3.0, 1.0, 7.0};
     	current_orientation.resize(4);
         current_control_params.resize(4, 0);
     	step_counter = 0;
@@ -88,6 +91,7 @@ public:
         get_position_client = n.serviceClient<gazebo_msgs::GetModelState>("/gazebo/get_model_state");
         perform_action_srv = n.advertiseService("env_tr_perform_action", &environmentTracker::performAction, this);
         get_state_srv = n.advertiseService("env_tr_get_state", &environmentTracker::getState, this);
+        set_target_srv = n.advertiseService("env_tr_set_target", &environmentTracker::setTarget, this);
     }
 
     void respawn() {
@@ -103,6 +107,17 @@ public:
         step_counter = 0;
 
         prev_distance = 5.0;
+
+        std::random_device rd;  //Will be used to obtain a seed for the random number engine
+        std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+
+        std::uniform_real_distribution<> dis(-5.0, 5.0);
+
+        //target_position = {0.0 + dis(gen), 0.0 + dis(gen), 0.0 + dis(gen)};
+        
+        target_position = {0.0 + dis(gen), 0.0 + dis(gen), 5.0};
+
+        ROS_INFO("Target: %f %f %f", target_position[0], target_position[1], target_position[2]);
 
         current_control_params.resize(4, 0);
 
@@ -121,18 +136,18 @@ public:
     }
 
     void onCollisionGround(const gazebo_msgs::ContactsState::ConstPtr& msg) {
-        if (msg->states.size() > 1 && step_counter > 50) {
-            ROS_INFO("Crash, respawn...");
-            step_counter = 0;
-            crashed_flag = true;
-            respawn();
-        }
+        // if (msg->states.size() > 1 && step_counter > 50) {
+        //     ROS_INFO("Crash, respawn...");
+        //     step_counter = 0;
+        //     crashed_flag = true;
+        //     respawn();
+        // }
     }
 
     void onCollision(const gazebo_msgs::ContactsState::ConstPtr& msg) {
-        if (msg->states.size() > 1 || current_position[2] >= 10.0 || //z constraints
-            current_position[1] >= 10.0 || current_position[1] <= -10.0 || //y constraints
-            current_position[0] >= 10.0 || current_position[0] <= -10.0) { //x constraints
+        if (msg->states.size() > 1 || (current_position[2] <= 0.1 && step_counter > 20) || current_position[2] >= 15.0 || //z constraints
+            current_position[1] >= 15.0 || current_position[1] <= -15.0 || //y constraints
+            current_position[0] >= 15.0 || current_position[0] <= -15.0) { //x constraints
                 ROS_INFO("Crash, respawn...");
                 step_counter = 0;
                 crashed_flag = true;
@@ -141,7 +156,7 @@ public:
     }
 
     bool performAction(rotors_reinforce::PerformAction::Request  &req, rotors_reinforce::PerformAction::Response &res) {
-        ROS_ASSERT(req.action.size() == current_control_params.size());
+        //ROS_ASSERT(req.action.size() == current_control_params.size());
 
         step_counter++;
 
@@ -192,7 +207,7 @@ public:
         msg.thrust.z = req.action[3] * max_thrust * axes_thrust_direction;
 
     
-        ROS_INFO("roll: %f, pitch: %f, yaw_rate: %f, thrust %f", msg.roll, msg.pitch, msg.yaw_rate, msg.thrust.z);
+        //ROS_INFO("roll: %f, pitch: %f, yaw_rate: %f, thrust %f", msg.roll, msg.pitch, msg.yaw_rate, msg.thrust.z);
 
         unpausePhysics();
         firefly_control_pub.publish(msg);
@@ -206,7 +221,14 @@ public:
         res.reward = getReward(step_counter);
         res.crashed = false;
 
-        //crash check at the end        
+        //crash check at the end  
+
+        ROS_INFO("step %i", step_counter);
+        if(step_counter > 300) {
+            crashed_flag = true;
+            respawn();
+        }
+
         if(crashed_flag) {
             res.crashed = true;
             crashed_flag = false;
@@ -225,11 +247,16 @@ public:
         return true;
     }
 
+    bool setTarget(rotors_reinforce::SetTarget::Request &req, rotors_reinforce::SetTarget::Response &res) {
+        target_position = req.target;
+        return true;
+    }
+
     void getPosition() {
             gazebo_msgs::GetModelState srv;
             srv.request.model_name = "firefly";
             if (get_position_client.call(srv)) {
-                ROS_INFO("Position: %f %f %f", (float)srv.response.pose.position.x, (float)srv.response.pose.position.y, (float)srv.response.pose.position.z);
+                //ROS_INFO("Position: %f %f %f", (float)srv.response.pose.position.x, (float)srv.response.pose.position.y, (float)srv.response.pose.position.z);
 
                 current_position[0] = (double)srv.response.pose.position.x;
                 current_position[1] = (double)srv.response.pose.position.y;
@@ -261,7 +288,7 @@ public:
         double reward4position =  1/(difx * difx * difx * difx + dify * dify * dify * dify + difz * difz * difz * difz + 1.0);
         double reward4orientation = 1/((current_orientation[0] * current_orientation[0] + current_orientation[1] * current_orientation[1] + current_orientation[2] * current_orientation[2])/(current_orientation[3] * current_orientation[3]) + 1);
     
-        reward = 0.9 * reward4position + 0.1 * reward4orientation;
+        reward = reward4position;
 
 
         //if(current_distance < prev_distance) {
